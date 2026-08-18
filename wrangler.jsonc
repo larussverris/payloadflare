@@ -1,0 +1,74 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
+  "name": "your-worker-name",
+  "compatibility_date": "2025-08-15",
+  "compatibility_flags": [
+    // Enable Node.js API
+    // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
+    "nodejs_compat",
+    // Allow to fetch URLs in your app
+    // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
+    "global_fetch_strictly_public",
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS",
+  },
+  "d1_databases": [
+    /*
+     * Payload CMS stores its collections, users, and other application data here.
+     * Replace the example name and placeholder ID with your Cloudflare D1 values.
+     */
+    {
+      "binding": "D1",
+      "database_id": "<D1_DATABASE_ID>",
+      "database_name": "your-d1-database-name",
+      "remote": true,
+    },
+    // D1 Tag Cache (Next mode)
+    {
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_id": "<NEXT_TAG_CACHE_D1_DATABASE_ID>",
+      "database_name": "your-next-tag-cache-database-name",
+    },
+  ],
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "your-worker-name",
+    },
+  ],
+
+  "durable_objects": {
+    "bindings": [
+      {
+        // OpenNext uses this Durable Object to coordinate and deduplicate ISR revalidations.
+        // Read more: https://opennext.js.org/cloudflare/caching#queue
+        "name": "NEXT_CACHE_DO_QUEUE",
+        "class_name": "DOQueueHandler",
+      },
+    ],
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
+  ],
+  "r2_buckets": [
+    {
+      // Payload stores files uploaded to the media collection in this bucket.
+      // Production file URLs are served through assets.yourdomain.co.
+      // Read more: https://payloadcms.com/docs/upload/storage-adapters#r2-storage
+      "binding": "R2",
+      "bucket_name": "your-media-bucket-name",
+    },
+    {
+      // OpenNext stores Next.js SSG, ISR, and data cache entries in this bucket.
+      // Read more: https://opennext.js.org/cloudflare/caching#incremental-static-regeneration-isr
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "your-next-cache-bucket-name",
+    },
+  ],
+}
