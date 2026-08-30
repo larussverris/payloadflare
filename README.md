@@ -2,6 +2,8 @@
 
 A minimal Payload CMS and Next.js starter for Cloudflare Workers.
 
+> **Important:** This starter currently exceeds the Cloudflare Workers Free plan's script-size limit, so deployment requires a paid Workers plan.
+
 Payload provides the admin panel and APIs, Next.js renders the website, and OpenNext deploys both as one Worker. Application data is stored in D1 and uploaded media is stored in R2.
 
 It starts with authenticated admin users, public media uploads, a form builder, and a blank frontend ready for application-specific collections and pages.
