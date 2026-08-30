@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     // instead of routing them through `/_next/image`.
     // https://opennext.js.org/cloudflare/howtos/image#use-a-custom-loader
     loader: 'custom',
-    loaderFile: './image-loader.ts',
+    loaderFile: './src/image-loader.ts',
     deviceSizes: [640, 750, 828, 1080, 1200, 1600, 1920, 2048],
     imageSizes: [32, 64, 96, 128, 256, 384],
   },
