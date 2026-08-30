@@ -8,7 +8,7 @@ It starts with authenticated admin users, public media uploads, a form builder, 
 
 ## Run locally
 
-Requirements: Node.js 20+, pnpm, and a Cloudflare account.
+Requirements: Node.js 24.15.0 or later, pnpm, and a Cloudflare account.
 
 ```bash
 pnpm install
