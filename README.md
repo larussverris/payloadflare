@@ -155,4 +155,4 @@ pnpm generate:types  # Regenerate Cloudflare and Payload types
 pnpm lint            # Run ESLint
 ```
 
-Uploads are limited to 5 MB. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
+Uploads are limited to 6 MiB. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
