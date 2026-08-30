@@ -1,3 +1,7 @@
+# Required: enforce the supported Node.js version declared in package.json.
+# Without this check, dependencies may install on an older Node version and fail later with unclear errors.
+engineStrict: true
+
 allowBuilds:
   esbuild: true
   sharp: true
