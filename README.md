@@ -118,7 +118,7 @@ pnpm deploy
 - **Persistent Next.js cache** stores SSG, ISR, and data-cache entries in R2.
 - **Regional cache** keeps frequently read cache entries close to the Worker for up to one minute.
 - **D1 read replicas** use Payload's `first-primary` strategy for consistent reads with lower latency after the initial primary query.
-- **On-demand invalidation** uses D1 cache tags and includes a Payload plugin that can invalidate configured globals and their related collections.
+- **On-demand invalidation** is supported through D1-backed Next.js cache tags when application code revalidates tagged content.
 - **Deduplicated revalidation** uses a Durable Object queue to avoid repeated ISR work.
 - **Cloudflare image transformations** resize images at `/cdn-cgi/image`, negotiate the output format automatically, and default to quality 85.
 - **Direct media delivery** serves production uploads from the configured media hostname instead of proxying them through Payload.

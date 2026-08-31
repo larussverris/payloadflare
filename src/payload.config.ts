@@ -11,7 +11,6 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
-import { payloadCacheInvalidationPlugin } from './plugins/payloadCacheInvalidation'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -108,11 +107,6 @@ export default buildConfig({
           },
         },
       },
-    }),
-    // Invalidate cached Next.js pages after public CMS content changes.
-    // Authentication collections and unpublished draft-only changes are skipped.
-    payloadCacheInvalidationPlugin({
-      globals: [],
     }),
   ],
 })
