@@ -114,7 +114,6 @@ pnpm deploy
 
 ## Optimizations
 
-- **Next.js Cache Components** are enabled for explicit, composable server caching.
 - **Metadata caching** keeps `robots.txt` and `llms.txt` on the `max` cache profile and `sitemap.xml` on the `hours` profile.
 - **Persistent Next.js cache** stores SSG, ISR, and data-cache entries in R2.
 - **Regional cache** keeps frequently read cache entries close to the Worker for up to one minute.
