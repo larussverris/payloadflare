@@ -23,19 +23,19 @@
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },
   "dependencies": {
-    "@opennextjs/cloudflare": "^1.11.0",
-    "@payloadcms/db-d1-sqlite": "3.82.1",
-    "@payloadcms/next": "3.82.1",
-    "@payloadcms/plugin-form-builder": "3.82.1",
-    "@payloadcms/richtext-lexical": "3.82.1",
-    "@payloadcms/storage-r2": "3.82.1",
-    "@payloadcms/ui": "3.82.1",
+    "@opennextjs/cloudflare": "^1.20.4",
+    "@payloadcms/db-d1-sqlite": "3.88.0",
+    "@payloadcms/next": "3.88.0",
+    "@payloadcms/plugin-form-builder": "3.88.0",
+    "@payloadcms/richtext-lexical": "3.88.0",
+    "@payloadcms/storage-r2": "3.88.0",
+    "@payloadcms/ui": "3.88.0",
     "cross-env": "10.1.0",
-    "graphql": "^16.8.1",
-    "next": "16.2.6",
-    "payload": "3.82.1",
-    "react": "19.2.6",
-    "react-dom": "19.2.6"
+    "graphql": "^16.14.2",
+    "next": "16.3.3",
+    "payload": "3.88.0",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
@@ -43,12 +43,12 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "babel-plugin-react-compiler": "1.0.0",
-    "eslint": "^9.16.0",
+    "eslint": "^9.39.5",
     "eslint-config-next": "16.2.6",
-    "prettier": "^3.4.2",
+    "prettier": "^3.9.6",
     "tailwindcss": "^4.3.3",
     "typescript": "6.0.3",
-    "wrangler": "~4.116.0"
+    "wrangler": "^4.127.1"
   },
   "engines": {
     "node": ">=24.15.0",
