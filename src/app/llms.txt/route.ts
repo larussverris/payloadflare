@@ -1,12 +1,6 @@
-import { cacheLife } from 'next/cache'
-
 const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL?.replace(/\/$/, '')
 
-const getLLMsText = async () => {
-  'use cache'
-
-  cacheLife('max')
-
+const getLLMsText = () => {
   const baseUrl = siteUrl || 'http://localhost:3000'
 
   return `# Payloadflare
@@ -33,8 +27,8 @@ Payload REST endpoints are available under \`${baseUrl}/api\` and GraphQL is ava
 `
 }
 
-export async function GET() {
-  return new Response(await getLLMsText(), {
+export function GET() {
+  return new Response(getLLMsText(), {
     headers: {
       'Cache-Control': 'public, max-age=0, s-maxage=31536000',
       'Content-Type': 'text/plain; charset=utf-8',
