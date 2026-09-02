@@ -58,9 +58,15 @@ export const cloudflareEmailAdapter = async (
         throw new Error('Cloudflare email requires at least one recipient.')
       }
 
+      const defaultFrom = {
+        address: args.defaultFromAddress,
+        name: args.defaultFromName,
+      }
+      const from = toCloudflareAddress(msg.from || defaultFrom)
+
       const email: CloudflareEmailMessage = {
         ...destinations,
-        from: toCloudflareAddress(msg.from || args?.defaultFromAddress),
+        from,
         subject: msg.subject,
         text: toCloudflareContent(msg.text),
         html: toCloudflareContent(msg.html),

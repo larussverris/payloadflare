@@ -89,7 +89,7 @@ describe('cloudflareEmailAdapter', () => {
 
     expect(send).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: defaultFromAddress,
+        from: { email: defaultFromAddress, name: defaultFromName },
         replyTo: 'reply@example.com',
         text: undefined,
         to: 'recipient@example.com',
@@ -111,6 +111,22 @@ describe('cloudflareEmailAdapter', () => {
       expect.objectContaining({
         from: 'sender@example.com',
         replyTo: 'reply@example.com',
+      }),
+    )
+  })
+
+  it('passes through a string sender address', async () => {
+    const { adapter, send } = await createAdapter()
+
+    await adapter.sendEmail({
+      from: 'sender@example.com',
+      subject: 'Hello',
+      to: 'recipient@example.com',
+    })
+
+    expect(send).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'sender@example.com',
       }),
     )
   })
