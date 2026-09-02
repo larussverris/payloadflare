@@ -46,6 +46,20 @@ The app uses:
 - `NEXT_TAG_CACHE_D1` for cache-tag invalidation
 - `NEXT_CACHE_DO_QUEUE` to coordinate ISR revalidation
 - `WORKER_SELF_REFERENCE` as the Worker's self-service binding
+- `EMAIL` to send transactional email through Cloudflare Email
+
+### Configure transactional email
+
+Set `defaultFromAddress` and `defaultFromName` in the email adapter configuration in
+`src/payload.config.ts`. These values are configured in code, not through environment variables.
+The sender address must use a domain onboarded to Cloudflare Email. Onboard the domain before
+sending mail:
+
+```bash
+pnpm wrangler email sending enable example.com
+```
+
+The `@payloadflare/email-cloudflare` workspace package is configured in `src/payload.config.ts`, so auth emails and `payload.sendEmail(...)` use the `EMAIL` binding.
 
 ### Enable D1 read replication
 

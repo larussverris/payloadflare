@@ -8,6 +8,7 @@ import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -109,6 +110,13 @@ export default buildConfig({
       },
     }),
   ],
+  email: cloudflareEmailAdapter({
+    defaultFromAddress: 'dev@payloadcms.com',
+    defaultFromName: 'Payload CMS',
+    // `SendEmail` is supplied by Wrangler's generated runtime types. The
+    // binding is cast while the generated environment file is being updated.
+    binding: cloudflare.env.EMAIL,
+  }),
 })
 
 // Adapted from https://github.com/opennextjs/opennextjs-cloudflare/blob/d00b3a13e42e65aad76fba41774815726422cc39/packages/cloudflare/src/api/cloudflare-context.ts#L328C36-L328C46

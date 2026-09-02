@@ -2,6 +2,14 @@
 # Without this check, dependencies may install on an older Node version and fail later with unclear errors.
 engineStrict: true
 
+packages:
+  - packages/*
+
+catalog:
+  '@types/node': 24.12.3
+  payload: 3.88.0
+  typescript: 6.0.3
+
 allowBuilds:
   esbuild: true
   sharp: true

@@ -39,6 +39,13 @@
       "service": "your-worker-name",
     },
   ],
+  "send_email": [
+    {
+      // Onboard the sender domain with `pnpm wrangler email sending enable yourdomain.com`.
+      "name": "EMAIL",
+      "remote": true,
+    },
+  ],
 
   "durable_objects": {
     "bindings": [
