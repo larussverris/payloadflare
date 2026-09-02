@@ -3,6 +3,13 @@
   "main": ".open-next/worker.js",
   "name": "your-worker-name",
   "compatibility_date": "2025-08-15",
+  // Persist Worker invocation, application, and error logs in Cloudflare.
+  // A head sampling rate of 1 captures logs for 100% of requests; lower it for high-traffic deployments.
+  // Read more: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
   "compatibility_flags": [
     // Enable Node.js API
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#nodejs-compatibility-flag
