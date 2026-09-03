@@ -1,12 +1,10 @@
 ![Payloadflare poster](public/poster.webp)
 
-A minimal Payload CMS and Next.js starter for Cloudflare Workers.
+Payloadflare is a starter for building content-managed websites with [Payload CMS](https://payloadcms.com/) and [Next.js](https://nextjs.org/), designed to be hosted on [Cloudflare Workers](https://developers.cloudflare.com/workers/).
 
 > **Important:** This starter currently exceeds the Cloudflare Workers Free plan's script-size limit, so deployment requires a paid Workers plan.
 
-Payload provides the admin panel and APIs, Next.js renders the website, and OpenNext deploys both as one Worker. Application data is stored in D1 and uploaded media is stored in R2.
-
-It starts with authenticated admin users, public media uploads, a form builder, and a blank frontend ready for application-specific collections and pages.
+It includes authenticated admin users, public media uploads, a form builder, and a blank frontend. Data is stored in [D1](https://developers.cloudflare.com/d1/) and media in [R2](https://developers.cloudflare.com/r2/).
 
 ## Run locally
 
@@ -14,27 +12,27 @@ Requirements: Node.js 24.15.0 or later, pnpm, and a Cloudflare account.
 
 ```bash
 pnpm install
-cp .env.example .env
 pnpm wrangler login
-pnpm dev
 ```
 
 Set these values in `.env`:
 
 ```dotenv
+# Generate a secret with `openssl rand -hex 32`.
 PAYLOAD_SECRET=replace-with-a-random-secret
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
-MEDIA_ORIGIN=https://assets.example.com
 ```
 
-Generate a secret with `openssl rand -hex 32`.
+Start the app:
+
+```bash
+pnpm dev
+```
 
 - Website: `http://localhost:3000`
 - Payload admin: `http://localhost:3000/admin`
-- REST API: `http://localhost:3000/api`
-- GraphQL API: `http://localhost:3000/api/graphql`
 
-## Configure Cloudflare
+## Deploy to Cloudflare
 
 Replace the placeholder names and IDs in `wrangler.jsonc` with your Worker, D1, and R2 resources.
 
@@ -57,7 +55,7 @@ The `first-primary` strategy is enabled in `src/payload.config.ts`, but replicas
 
 ### Configure the media domain and cache
 
-Connect the media R2 bucket to a custom domain such as `assets.yoursite.com`, then set `MEDIA_ORIGIN` to that URL in your local environment and Cloudflare Worker environment. The app fails fast in production if it is missing.
+Connect the media R2 bucket to a custom domain such as `assets.yoursite.com`, then set `MEDIA_ORIGIN` to that URL in the Cloudflare Worker environment. The app fails fast in production if it is missing.
 
 Cloudflare's default Browser Cache TTL is four hours. Under **Caching → Cache Rules**, create a rule named **R2 images - 30 day browser TTL** that keeps images in both Cloudflare's edge cache and visitors' browser caches for longer.
 
@@ -144,16 +142,5 @@ Cache-Control: public,max-age=2592000
 These files are cached by browsers for 30 days. Versioned filenames such as `logo-v2.svg` or `logo.abcd1234.svg` are still useful when an update must appear immediately.
 
 Other files placed directly in `public/` use Cloudflare's normal static-asset caching unless another rule is added to `public/_headers`.
-
-## Useful commands
-
-```bash
-pnpm dev             # Start local development
-pnpm build           # Build the Next.js application
-pnpm preview         # Build and preview with OpenNext
-pnpm deploy          # Migrate D1, optimize it, build, and deploy
-pnpm generate:types  # Regenerate Cloudflare and Payload types
-pnpm lint            # Run ESLint
-```
 
 Uploads are limited to 6 MiB. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
