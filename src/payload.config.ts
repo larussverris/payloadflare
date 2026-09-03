@@ -68,15 +68,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media],
-  editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
-  upload: {
-    abortOnLimit: true,
-    limits: {
-      // Cap uploads to 6 MB.
-      fileSize: 6 * 1024 * 1024,
-    },
-  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
@@ -106,6 +98,15 @@ export default buildConfig({
       },
     }),
   ],
+  upload: {
+    abortOnLimit: true,
+    limits: {
+      // Cap uploads to 6 MB.
+      fileSize: 6 * 1024 * 1024,
+    },
+  },
+  // https://payloadcms.com/docs/rich-text/overview
+  editor: lexicalEditor({}),
   email: cloudflareEmailAdapter({
     defaultFromAddress: 'noreply@yourdomain.com',
     defaultFromName: 'Payload CMS',
