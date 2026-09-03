@@ -7,9 +7,9 @@ import type { SendEmail } from './types'
 const defaultFromAddress = 'noreply@example.com'
 const defaultFromName = 'Example'
 
-const createAdapter = async (send = vi.fn().mockResolvedValue({ messageId: 'message-id' })) => {
+const createAdapter = (send = vi.fn().mockResolvedValue({ messageId: 'message-id' })) => {
   const binding = { send } as SendEmail
-  const adapter = await cloudflareEmailAdapter({ defaultFromAddress, defaultFromName, binding })
+  const adapter = cloudflareEmailAdapter({ defaultFromAddress, defaultFromName, binding })
   const initializedAdapter = adapter({
     payload: {} as never,
   })
@@ -36,7 +36,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('exposes its Payload adapter metadata', async () => {
-    const { adapter } = await createAdapter()
+    const { adapter } = createAdapter()
 
     expect(adapter).toMatchObject({
       defaultFromAddress,
@@ -46,7 +46,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('maps addresses and message bodies', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       bcc: { address: 'audit@example.com' },
@@ -80,7 +80,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('uses the default sender and supports a string reply-to', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       html: '<p>Hello</p>',
@@ -100,7 +100,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('maps unnamed sender and reply-to addresses to strings', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       from: { address: 'sender@example.com' },
@@ -118,7 +118,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('passes through a string sender address', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       from: 'sender@example.com',
@@ -134,7 +134,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('converts HTML Buffers to UTF-8 strings', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       html: Buffer.from('<p>Hello</p>'),
@@ -146,7 +146,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('accepts CC as the only recipient and ignores empty recipient arrays', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({ cc: 'copy@example.com', subject: 'Hello', text: 'Body', to: [] })
 
@@ -155,7 +155,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('accepts BCC as the only recipient', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({ bcc: 'hidden@example.com', subject: 'Hello', text: 'Body' })
 
@@ -163,7 +163,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('falls back to BCC when TO and CC recipient arrays are empty', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({
       bcc: 'hidden@example.com',
@@ -179,7 +179,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('requires at least one recipient', async () => {
-    const { adapter } = await createAdapter()
+    const { adapter } = createAdapter()
 
     await expect(adapter.sendEmail({ subject: 'Hello', text: 'Body' })).rejects.toThrow(
       'Cloudflare email requires at least one recipient.',
@@ -187,7 +187,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('requires a subject', async () => {
-    const { adapter } = await createAdapter()
+    const { adapter } = createAdapter()
 
     await expect(adapter.sendEmail({ text: 'Body', to: 'recipient@example.com' })).rejects.toThrow(
       'Cloudflare email requires a subject.',
@@ -195,7 +195,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('handles an empty reply-to array', async () => {
-    const { adapter, send } = await createAdapter()
+    const { adapter, send } = createAdapter()
 
     await adapter.sendEmail({ replyTo: [], subject: 'Hello', text: 'Body', to: 'user@example.com' })
 
@@ -203,7 +203,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('rejects multiple reply-to addresses', async () => {
-    const { adapter } = await createAdapter()
+    const { adapter } = createAdapter()
 
     await expect(
       adapter.sendEmail({
@@ -216,7 +216,7 @@ describe('cloudflareEmailAdapter', () => {
   })
 
   it('rejects unsupported body content', async () => {
-    const { adapter } = await createAdapter()
+    const { adapter } = createAdapter()
 
     await expect(
       adapter.sendEmail({
@@ -230,7 +230,7 @@ describe('cloudflareEmailAdapter', () => {
   it('returns the EMAIL binding response', async () => {
     const response = { messageId: 'returned-message-id' }
     const send = vi.fn().mockResolvedValue(response)
-    const { adapter } = await createAdapter(send)
+    const { adapter } = createAdapter(send)
 
     await expect(adapter.sendEmail({ subject: 'Hello', to: 'user@example.com' })).resolves.toBe(
       response,
@@ -240,8 +240,10 @@ describe('cloudflareEmailAdapter', () => {
   it('propagates EMAIL binding errors', async () => {
     const error = new Error('Email Service unavailable')
     const send = vi.fn().mockRejectedValue(error)
-    const { adapter } = await createAdapter(send)
+    const { adapter } = createAdapter(send)
 
-    await expect(adapter.sendEmail({ subject: 'Hello', to: 'user@example.com' })).rejects.toBe(error)
+    await expect(adapter.sendEmail({ subject: 'Hello', to: 'user@example.com' })).rejects.toBe(
+      error,
+    )
   })
 })
