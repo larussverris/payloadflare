@@ -34,6 +34,23 @@ pnpm dev
 - Website: `http://localhost:3000`
 - Payload admin: `http://localhost:3000/admin`
 
+## Keep your project up to date
+
+To bring template improvements into a project created from this repository, add this repository as an `upstream` remote once:
+
+```bash
+git remote add upstream https://github.com/larussverris/payloadflare.git
+```
+
+Then fetch and merge template updates when needed:
+
+```bash
+git fetch upstream
+git merge upstream/main
+```
+
+Resolve any merge conflicts, then run the relevant checks before deploying.
+
 ## Deploy to Cloudflare
 
 Replace the placeholder names and IDs in `wrangler.jsonc` with your Worker, D1, and R2 resources.
