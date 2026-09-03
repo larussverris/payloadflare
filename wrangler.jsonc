@@ -38,7 +38,6 @@
       "binding": "D1",
       "database_id": "<D1_DATABASE_ID>",
       "database_name": "your-d1-database-name",
-      "remote": true,
     },
     // D1 Tag Cache (Next mode)
     {
@@ -57,7 +56,6 @@
     {
       // Onboard the sender domain with `pnpm wrangler email sending enable yourdomain.com`.
       "name": "EMAIL",
-      "remote": true,
       // Keep this address in sync with `defaultFromAddress` in `src/payload.config.ts`.
       "allowed_sender_addresses": ["noreply@yourdomain.com"],
     },
