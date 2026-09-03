@@ -15,21 +15,16 @@ import { Media } from './collections/Media'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-const realpath = (value: string) => {
-  try {
-    return fs.existsSync(value) ? fs.realpathSync(value) : undefined
-  } catch {
-    return undefined
-  }
-}
+const realpath = (value: string) => (fs.existsSync(value) ? fs.realpathSync(value) : undefined)
 
 const isCLI = process.argv.some((value) => {
   const resolved = realpath(value)
-  if (!resolved) return false
-  return (
-    resolved.endsWith(path.join('payload', 'bin.js')) ||
-    resolved.endsWith(path.join('next', 'dist', 'bin', 'next'))
-  )
+
+  if (!resolved) {
+    return false
+  }
+
+  return resolved.endsWith(path.join('payload', 'bin.js'))
 })
 const isProduction = process.env.NODE_ENV === 'production'
 const mediaOrigin = process.env.MEDIA_ORIGIN?.replace(/\/$/, '')
@@ -65,6 +60,7 @@ const cloudflare =
 
 export default buildConfig({
   admin: {
+    // https://payloadcms.com/docs/authentication/overview
     autoRefresh: true,
     user: Users.slug,
     importMap: {

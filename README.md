@@ -2,6 +2,8 @@
 
 Payloadflare is a starter for building content-managed websites with [Payload CMS](https://payloadcms.com/) and [Next.js](https://nextjs.org/), designed to be hosted on [Cloudflare Workers](https://developers.cloudflare.com/workers/).
 
+It is derived from [Payload's official Cloudflare D1 template](https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1).
+
 > **Important:** This starter currently exceeds the Cloudflare Workers Free plan's script-size limit, so deployment requires a paid Workers plan.
 
 It includes authenticated admin users, public media uploads, a form builder, and a blank frontend. Data is stored in [D1](https://developers.cloudflare.com/d1/) and media in [R2](https://developers.cloudflare.com/r2/).
