@@ -15,7 +15,7 @@ pnpm install
 pnpm wrangler login
 ```
 
-Set these values in `.env`:
+Create a `.env` file with:
 
 ```dotenv
 # Generate a secret with `openssl rand -hex 32`.
@@ -72,46 +72,21 @@ The `first-primary` strategy is enabled in `src/payload.config.ts`, but replicas
 
 Connect the media R2 bucket to a custom domain such as `assets.yoursite.com`, then set `MEDIA_ORIGIN` to that URL in the Cloudflare Worker environment. The app fails fast in production if it is missing.
 
-Cloudflare's default Browser Cache TTL is four hours. Under **Caching → Cache Rules**, create a rule named **R2 images - 30 day browser TTL** that keeps images in both Cloudflare's edge cache and visitors' browser caches for longer.
+Cloudflare's default Browser Cache TTL is four hours. Under **Caching → Cache Rules**, create a rule named **R2 media - 30 day cache** that keeps uploaded images and videos in both Cloudflare's edge cache and visitors' browser caches for longer.
 
-Match the media hostname and only image extensions:
+Match the media hostname and image or video extensions:
 
 ```text
-(http.host eq "assets.yoursite.com" and http.request.uri.path.extension in {"avif" "gif" "jpg" "jpeg" "png" "svg" "webp"})
+(http.host eq "assets.yoursite.com" and http.request.uri.path.extension in {"avif" "gif" "jpg" "jpeg" "png" "svg" "webp" "mp4" "webm"})
 ```
 
 Use these settings:
 
 - **Cache eligibility:** Eligible for cache
 - **Edge TTL:** Ignore cache-control header and use **30 days**
-- **Browser TTL:** Override origin and use **30 days**
+- **Browser TTL:** Override origin and use **1 hour**
 
 A Cloudflare cache purge cannot remove files already stored in visitors' browsers. When replacing a media file, use a new or versioned filename so its URL changes.
-
-#### Cache R2 videos
-
-Create a second, mutually exclusive Cache Rule named **R2 videos - 1 year edge, 7 day browser** so large, immutable files remain at the edge longer without keeping them in visitors' browsers for a full month.
-
-Match both of these conditions:
-
-- **Hostname equals `assets.yoursite.com`**
-- **File extension is in `webm`, `mp4`**
-
-The equivalent expression is:
-
-```text
-(http.host eq "assets.yoursite.com" and http.request.uri.path.extension in {"webm" "mp4"})
-```
-
-Use these settings:
-
-- **Cache eligibility:** Eligible for cache
-- **Edge TTL:** Ignore cache-control header and use **1 year**
-- **Browser TTL:** Override origin and use **7 days**
-
-The image and video extension sets do not overlap, so the order of these two rules does not affect their TTL settings.
-
-Cloudflare's edge cache accepts files up to 512 MB on Free, Pro, and Business plans. Larger videos can still be served from R2, but they will not be stored in the edge cache.
 
 Before deploying schema changes, create a Payload migration:
 
