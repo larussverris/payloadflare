@@ -111,7 +111,7 @@ export default buildConfig({
     }),
   ],
   email: cloudflareEmailAdapter({
-    defaultFromAddress: 'dev@payloadcms.com',
+    defaultFromAddress: 'noreply@yourdomain.com',
     defaultFromName: 'Payload CMS',
     // `SendEmail` is supplied by Wrangler's generated runtime types. The
     // binding is cast while the generated environment file is being updated.

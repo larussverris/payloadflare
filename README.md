@@ -52,8 +52,9 @@ The app uses:
 
 Set `defaultFromAddress` and `defaultFromName` in the email adapter configuration in
 `src/payload.config.ts`. These values are configured in code, not through environment variables.
-The sender address must use a domain onboarded to Cloudflare Email. Onboard the domain before
-sending mail:
+Keep `defaultFromAddress` in sync with `allowed_sender_addresses` on the `EMAIL` binding in
+`wrangler.jsonc`. The sender address must use a domain onboarded to Cloudflare Email. Onboard the
+domain before sending mail:
 
 ```bash
 pnpm wrangler email sending enable example.com

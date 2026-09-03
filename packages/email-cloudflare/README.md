@@ -32,8 +32,6 @@ export default buildConfig({
 | `subject` | Required by Cloudflare. |
 | `text`, `html` | Accepts strings and UTF-8 `Buffer` values. |
 | `replyTo` | Maps one reply-to address. |
-| `headers` | Maps string headers and string arrays. |
-| `inReplyTo`, `references`, `priority` | Maps to Cloudflare-compatible email headers. |
 
 ## Not implemented Nodemailer features
 
@@ -50,5 +48,5 @@ The following Nodemailer options are not implemented by this adapter.
 | `attachDataUrls` | Cloudflare does not automatically turn HTML data URLs into attachments. |
 | `list` | Intentionally skipped. |
 | `xMailer` | Intentionally skipped. |
-| `normalizeHeaderKey`, prepared headers | Cloudflare accepts only string header values, not Nodemailer serialization hooks or prepared values. |
+| `headers`, `inReplyTo`, `references`, `priority`, `normalizeHeaderKey` | Header support is intentionally deferred because Cloudflare accepts only allowlisted headers. |
 | `disableFileAccess`, `disableUrlAccess` | The adapter does not load content from files or URLs. |

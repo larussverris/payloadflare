@@ -2,13 +2,13 @@ import { Readable } from 'node:stream'
 import { describe, expect, it, vi } from 'vitest'
 
 import { cloudflareEmailAdapter } from './index'
-import type { EmailBinding } from './types'
+import type { SendEmail } from './types'
 
 const defaultFromAddress = 'noreply@example.com'
 const defaultFromName = 'Example'
 
 const createAdapter = async (send = vi.fn().mockResolvedValue({ messageId: 'message-id' })) => {
-  const binding = { send } as EmailBinding
+  const binding = { send } as SendEmail
   const adapter = await cloudflareEmailAdapter({ defaultFromAddress, defaultFromName, binding })
   const initializedAdapter = adapter({
     payload: {} as never,
@@ -18,18 +18,21 @@ const createAdapter = async (send = vi.fn().mockResolvedValue({ messageId: 'mess
 }
 
 describe('cloudflareEmailAdapter', () => {
-  it('requires adapter arguments during initialization', async () => {
-    await expect(cloudflareEmailAdapter()).rejects.toThrow('Missing Cloudflare EMAIL binding')
+  it('requires adapter arguments during initialization', () => {
+    expect(() => {
+      // @ts-expect-error Verify runtime validation for JavaScript callers.
+      cloudflareEmailAdapter()
+    }).toThrow('Missing Cloudflare email adapter arguments.')
   })
 
-  it('requires the Cloudflare binding during initialization', async () => {
-    await expect(
+  it('requires the Cloudflare binding during initialization', () => {
+    expect(() => {
       cloudflareEmailAdapter({
         defaultFromAddress,
         defaultFromName,
-        binding: undefined as unknown as EmailBinding,
-      }),
-    ).rejects.toThrow('Missing Cloudflare EMAIL binding')
+        binding: undefined as unknown as SendEmail,
+      })
+    }).toThrow('Missing Cloudflare EMAIL binding.')
   })
 
   it('exposes its Payload adapter metadata', async () => {
@@ -64,7 +67,6 @@ describe('cloudflareEmailAdapter', () => {
       bcc: 'audit@example.com',
       cc: 'copy@example.com',
       from: { email: 'sender@example.com', name: 'Sender' },
-      headers: undefined,
       html: '<p>Hello</p>',
       replyTo: { email: 'reply@example.com', name: 'Replies' },
       subject: 'Hello',
@@ -91,10 +93,10 @@ describe('cloudflareEmailAdapter', () => {
       expect.objectContaining({
         from: { email: defaultFromAddress, name: defaultFromName },
         replyTo: 'reply@example.com',
-        text: undefined,
         to: 'recipient@example.com',
       }),
     )
+    expect(send.mock.calls[0][0]).not.toHaveProperty('text')
   })
 
   it('maps unnamed sender and reply-to addresses to strings', async () => {
@@ -197,7 +199,7 @@ describe('cloudflareEmailAdapter', () => {
 
     await adapter.sendEmail({ replyTo: [], subject: 'Hello', text: 'Body', to: 'user@example.com' })
 
-    expect(send).toHaveBeenCalledWith(expect.objectContaining({ replyTo: undefined }))
+    expect(send.mock.calls[0][0]).not.toHaveProperty('replyTo')
   })
 
   it('rejects multiple reply-to addresses', async () => {
@@ -225,35 +227,6 @@ describe('cloudflareEmailAdapter', () => {
     ).rejects.toThrow('Cloudflare email content must be a string or UTF-8 Buffer.')
   })
 
-  it('maps custom and derived headers', async () => {
-    const { adapter, send } = await createAdapter()
-
-    await adapter.sendEmail({
-      headers: {
-        'X-Multiple': ['one', 'two'],
-        'X-String': 'value',
-      },
-      inReplyTo: '<parent@example.com>',
-      priority: 'high',
-      references: ['<first@example.com>', '<second@example.com>'],
-      subject: 'Hello',
-      text: 'Body',
-      to: 'user@example.com',
-    })
-
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: {
-          Importance: 'high',
-          'In-Reply-To': '<parent@example.com>',
-          References: '<first@example.com> <second@example.com>',
-          'X-Multiple': 'one, two',
-          'X-String': 'value',
-        },
-      }),
-    )
-  })
-
   it('returns the EMAIL binding response', async () => {
     const response = { messageId: 'returned-message-id' }
     const send = vi.fn().mockResolvedValue(response)
@@ -270,84 +243,5 @@ describe('cloudflareEmailAdapter', () => {
     const { adapter } = await createAdapter(send)
 
     await expect(adapter.sendEmail({ subject: 'Hello', to: 'user@example.com' })).rejects.toBe(error)
-  })
-
-  it('returns undefined for empty headers', async () => {
-    const { adapter, send } = await createAdapter()
-
-    await adapter.sendEmail({ headers: {}, subject: 'Hello', to: 'user@example.com' })
-
-    expect(send).toHaveBeenCalledWith(expect.objectContaining({ headers: undefined }))
-  })
-
-  it('gives derived headers precedence over custom headers', async () => {
-    const { adapter, send } = await createAdapter()
-
-    await adapter.sendEmail({
-      headers: {
-        Importance: 'normal',
-        'In-Reply-To': '<custom@example.com>',
-        References: '<custom@example.com>',
-      },
-      inReplyTo: '<derived@example.com>',
-      priority: 'high',
-      references: '<derived@example.com>',
-      subject: 'Hello',
-      to: 'user@example.com',
-    })
-
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: {
-          Importance: 'high',
-          'In-Reply-To': '<derived@example.com>',
-          References: '<derived@example.com>',
-        },
-      }),
-    )
-  })
-
-  it.each(['normal', 'low'] as const)('maps %s priority', async (priority) => {
-    const { adapter, send } = await createAdapter()
-
-    await adapter.sendEmail({ priority, subject: 'Hello', to: 'user@example.com' })
-
-    expect(send).toHaveBeenCalledWith(expect.objectContaining({ headers: { Importance: priority } }))
-  })
-
-  it('maps header arrays, address reply IDs, and string references', async () => {
-    const { adapter, send } = await createAdapter()
-
-    await adapter.sendEmail({
-      headers: [{ key: 'X-Test', value: 'value' }],
-      inReplyTo: { address: '<parent@example.com>' },
-      references: '<reference@example.com>',
-      subject: 'Hello',
-      text: 'Body',
-      to: 'user@example.com',
-    })
-
-    expect(send).toHaveBeenCalledWith(
-      expect.objectContaining({
-        headers: {
-          'In-Reply-To': '<parent@example.com>',
-          References: '<reference@example.com>',
-          'X-Test': 'value',
-        },
-      }),
-    )
-  })
-
-  it('rejects prepared Nodemailer headers', async () => {
-    const { adapter } = await createAdapter()
-
-    await expect(
-      adapter.sendEmail({
-        headers: { 'X-Test': { prepared: true, value: 'value' } },
-        subject: 'Hello',
-        text: 'Body',
-        to: 'user@example.com',
-      }),
-    ).rejects.toThrow('Cloudflare does not support Nodemailer\'s prepared header "X-Test".')
   })
 })
