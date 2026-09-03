@@ -18,6 +18,11 @@
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
     "global_fetch_strictly_public",
   ],
+  // Public URLs used for uploaded media and canonical site links.
+  "vars": {
+    "MEDIA_ORIGIN": "https://assets.yourdomain.com",
+    "NEXT_PUBLIC_SERVER_URL": "https://yourdomain.com",
+  },
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS",
