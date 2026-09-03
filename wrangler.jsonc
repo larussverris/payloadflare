@@ -22,6 +22,8 @@
   "vars": {
     "MEDIA_ORIGIN": "https://assets.yourdomain.com",
     "NEXT_PUBLIC_SERVER_URL": "https://yourdomain.com",
+    // `trace` shows every log while setting up the template; reduce this to `info` later.
+    "PAYLOAD_LOG_LEVEL": "trace",
   },
   "assets": {
     "directory": ".open-next/assets",
