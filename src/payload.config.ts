@@ -68,6 +68,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media],
+  globals: [],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
