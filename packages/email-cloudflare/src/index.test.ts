@@ -227,6 +227,18 @@ describe('cloudflareEmailAdapter', () => {
     ).rejects.toThrow('Cloudflare email content must be a string or UTF-8 Buffer.')
   })
 
+  it('rejects attachments', async () => {
+    const { adapter } = createAdapter()
+
+    await expect(
+      adapter.sendEmail({
+        attachments: [{ content: 'Body', filename: 'message.txt' }],
+        subject: 'Hello',
+        to: 'user@example.com',
+      }),
+    ).rejects.toThrow('Cloudflare email attachments are not supported.')
+  })
+
   it('returns the EMAIL binding response', async () => {
     const response = { messageId: 'returned-message-id' }
     const send = vi.fn().mockResolvedValue(response)

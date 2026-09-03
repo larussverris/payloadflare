@@ -41,7 +41,7 @@ The following Nodemailer options are not implemented by this adapter.
 | --- | --- |
 | `sender`, `envelope` | SMTP envelope controls are not exposed by the Workers binding. |
 | `watchHtml`, `amp`, `icalEvent`, `alternatives` | Cloudflare's structured API does not support these additional MIME parts. |
-| `attachments` | Mappable to Cloudflare's attachment shape, but support is intentionally deferred. |
+| `attachments` | Mappable to Cloudflare's attachment shape, but support is intentionally deferred and the adapter rejects them to prevent silent data loss. |
 | `raw` | Raw MIME cannot be passed to the structured email builder. |
 | `messageId`, `date`, `encoding`, `textEncoding` | Cloudflare does not expose MIME serialization controls. |
 | `dkim` | Cloudflare manages DKIM for onboarded sender domains. |

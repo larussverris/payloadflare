@@ -49,6 +49,10 @@ const cloudflareEmailAdapter = (args: EmailAdapterArgs): CloudflareEmailAdapter 
       throw new Error('Cloudflare email requires a subject.')
     }
 
+    if (msg.attachments && msg.attachments.length > 0) {
+      throw new Error('Cloudflare email attachments are not supported.')
+    }
+
     const to = toCloudflareRecipients(msg.to)
     const cc = toCloudflareRecipients(msg.cc)
     const bcc = toCloudflareRecipients(msg.bcc)
