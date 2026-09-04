@@ -38,6 +38,8 @@
       "binding": "D1",
       "database_id": "<D1_DATABASE_ID>",
       "database_name": "your-d1-database-name",
+      // Let Next.js static generation query the deployed Payload schema and content during builds.
+      "remote": true,
     },
     // D1 Tag Cache (Next mode)
     {
