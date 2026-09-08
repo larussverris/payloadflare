@@ -1,0 +1,21 @@
+{
+  "name": "@payloadflare/versioned-filenames",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "node --test src/index.test.mjs",
+    "typecheck": "tsc --noEmit --pretty false"
+  },
+  "peerDependencies": {
+    "payload": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "payload": "catalog:",
+    "typescript": "catalog:"
+  }
+}

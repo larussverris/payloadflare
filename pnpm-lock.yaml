@@ -77,6 +77,9 @@ importers:
       '@payloadflare/email-cloudflare':
         specifier: workspace:*
         version: link:packages/email-cloudflare
+      '@payloadflare/versioned-filenames':
+        specifier: workspace:*
+        version: link:packages/versioned-filenames
       graphql:
         specifier: ^16.14.2
         version: 16.14.2
@@ -144,6 +147,18 @@ importers:
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@24.12.3)(@vitest/coverage-v8@4.1.11)(happy-dom@20.12.0)(vite@8.2.2(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.77.4)(terser@5.16.9)(tsx@4.22.4)(yaml@2.9.0))
+
+  packages/versioned-filenames:
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.3
+      payload:
+        specifier: 'catalog:'
+        version: 3.88.0(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
 packages:
 

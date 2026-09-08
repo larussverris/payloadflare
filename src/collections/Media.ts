@@ -1,5 +1,4 @@
 import type { CollectionConfig } from 'payload'
-import { extname } from 'node:path'
 
 export const Media: CollectionConfig = {
   slug: 'media',
@@ -39,17 +38,5 @@ export const Media: CollectionConfig = {
 
       return headers
     },
-  },
-  hooks: {
-    beforeOperation: [
-      ({ operation, req }) => {
-        if ((operation !== 'create' && operation !== 'update') || !req.file) {
-          return
-        }
-
-        // Replacements get a new URL so cached copies of the old file stay separate.
-        req.file.name = `${crypto.randomUUID().replaceAll('-', '')}${extname(req.file.name)}`
-      },
-    ],
   },
 }
