@@ -9,6 +9,7 @@ import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
+import { livePreviewPlugin } from '@payloadflare/live-preview'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
@@ -79,6 +80,10 @@ export default buildConfig({
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
+    livePreviewPlugin({
+      collections: [],
+      globals: [],
+    }),
     formBuilderPlugin({
       fields: {
         payment: false,
