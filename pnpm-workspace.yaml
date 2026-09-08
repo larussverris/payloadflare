@@ -7,7 +7,19 @@ packages:
 
 catalog:
   '@types/node': 24.12.3
-  payload: 3.88.0
+  '@types/react': 19.2.14
+  '@types/react-dom': 19.2.3
+  next: 16.3.3
+  # Keep all Payload packages on the same release.
+  payload: &payloadVersion 3.88.0
+  '@payloadcms/db-d1-sqlite': *payloadVersion
+  '@payloadcms/next': *payloadVersion
+  '@payloadcms/plugin-form-builder': *payloadVersion
+  '@payloadcms/richtext-lexical': *payloadVersion
+  '@payloadcms/storage-r2': *payloadVersion
+  '@payloadcms/ui': *payloadVersion
+  react: &reactVersion 19.2.8
+  react-dom: *reactVersion
   typescript: 6.0.3
 
 allowBuilds:
