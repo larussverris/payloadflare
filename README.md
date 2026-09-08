@@ -97,7 +97,7 @@ On a cache miss, Payload retrieves the image from R2. On a hit, Cloudflare serve
 
 After deploying, request the same uploaded image twice using `curl -sS -D - -o /dev/null https://yourdomain.com/api/media/file/example.jpg` and check for `CF-Cache-Status: HIT` on a repeated request. Also verify `/admin` and `/api/media` do not produce cache hits. Edge behavior must be verified on Cloudflare, not just with `pnpm dev`.
 
-Use a new filename when replacing an image so browsers fetch the new URL. Purge its Workers Cache entry if the old URL should stop being served from the edge. Purging cannot remove a copy already cached in a browser, and a TTL does not guarantee an object remains in edge cache until it expires.
+New uploads and file replacements automatically receive a 32-character hexadecimal filename (a UUID without hyphens), preserving the extension, so browsers fetch a new URL. Metadata-only edits keep the existing filename; existing uploads are not renamed until replaced. Purge its Workers Cache entry if the old URL should stop being served from the edge. Purging cannot remove a copy already cached in a browser, and a TTL does not guarantee an object remains in edge cache until it expires.
 
 ### Deploy schema and application changes
 
