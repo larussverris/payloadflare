@@ -58,9 +58,6 @@
     "bindings": {
       "PAYLOAD_SECRET": {
         "description": "Generate a random string using `openssl rand -hex 32`"
-      },
-      "MEDIA_ORIGIN": {
-        "description": "Public HTTPS origin for the R2 media custom domain, for example https://assets.example.com"
       }
     }
   }

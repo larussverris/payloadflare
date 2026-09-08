@@ -3,6 +3,11 @@
   "main": ".open-next/worker.js",
   "name": "your-worker-name",
   "compatibility_date": "2025-08-15",
+  // Payload sets image cache headers; next.config.ts excludes other app routes.
+  // https://developers.cloudflare.com/workers/cache/configuration/
+  "cache": {
+    "enabled": true,
+  },
   // Persist Worker invocation, application, and error logs in Cloudflare.
   // A head sampling rate of 1 captures logs for 100% of requests; lower it for high-traffic deployments.
   // Read more: https://developers.cloudflare.com/workers/observability/logs/workers-logs/
@@ -18,9 +23,8 @@
     // see https://developers.cloudflare.com/workers/configuration/compatibility-flags/#global-fetch-strictly-public
     "global_fetch_strictly_public",
   ],
-  // Public URLs used for uploaded media and canonical site links.
+  // Public URL used for canonical site links.
   "vars": {
-    "MEDIA_ORIGIN": "https://assets.yourdomain.com",
     "NEXT_PUBLIC_SERVER_URL": "https://yourdomain.com",
     // `trace` shows every log while setting up the template; reduce this to `info` later.
     "PAYLOAD_LOG_LEVEL": "trace",
@@ -82,7 +86,7 @@
   "r2_buckets": [
     {
       // Payload stores files uploaded to the media collection in this bucket.
-      // Production file URLs are served through assets.yourdomain.co.
+      // Files are served through Payload's /api/media/file/ route.
       // Read more: https://payloadcms.com/docs/upload/storage-adapters#r2-storage
       "binding": "R2",
       "bucket_name": "your-media-bucket-name",

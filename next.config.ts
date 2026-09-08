@@ -3,6 +3,16 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   transpilePackages: ['@payloadflare/email-cloudflare'],
+  async headers() {
+    return [
+      {
+        // Payload owns caching for its file responses. Keep other application
+        // routes out of Workers Cache without changing their browser headers.
+        source: '/:path((?!api/media/file/).*)',
+        headers: [{ key: 'Cloudflare-CDN-Cache-Control', value: 'no-store' }],
+      },
+    ]
+  },
   images: {
     // Follow OpenNext's custom-loader setup to serve transformed images directly
     // instead of routing them through `/_next/image`.

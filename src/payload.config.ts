@@ -27,11 +27,6 @@ const isCLI = process.argv.some((value) => {
   return resolved.endsWith(path.join('payload', 'bin.js'))
 })
 const isProduction = process.env.NODE_ENV === 'production'
-const mediaOrigin = process.env.MEDIA_ORIGIN?.replace(/\/$/, '')
-
-if (isProduction && !mediaOrigin) {
-  throw new Error('MEDIA_ORIGIN must be set in production.')
-}
 
 const createLog =
   (level: string, fn: typeof console.log) => (objOrMsg: object | string, msg?: string) => {
@@ -86,17 +81,7 @@ export default buildConfig({
     }),
     r2Storage({
       bucket: cloudflare.env.R2,
-      collections: {
-        media: {
-          generateFileURL: ({ filename }) => {
-            if (isProduction) {
-              return `${mediaOrigin}/${filename}`
-            }
-
-            return `/api/media/file/${filename}`
-          },
-        },
-      },
+      collections: { media: true },
     }),
   ],
   upload: {

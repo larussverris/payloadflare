@@ -87,25 +87,19 @@ The `first-primary` strategy is enabled in `src/payload.config.ts`, but replicas
 2. Go to **Settings**.
 3. Enable **Read Replication**.
 
-### Configure the media domain and cache
+### Media storage
 
-Connect the media R2 bucket to a custom domain such as `assets.yoursite.com`, then set `MEDIA_ORIGIN` to that URL in the Cloudflare Worker environment. The app fails fast in production if it is missing.
+Payload stores uploads in the `R2` bucket and serves files through `/api/media/file/<filename>` in both development and production. No separate media domain or media URL environment variable is required.
 
-Cloudflare's default Browser Cache TTL is four hours. Under **Caching → Cache Rules**, create a rule named **R2 media - 30 day cache** that keeps uploaded images and videos in both Cloudflare's edge cache and visitors' browser caches for longer.
+Public image responses use a 30-day browser TTL and a 30-day edge TTL in production. Development image responses use `no-store`. [Workers Cache](https://developers.cloudflare.com/workers/cache/) is enabled in `wrangler.jsonc`, using the standard OpenNext entrypoint. Payload's `Media` collection sets the file response cache headers; `next.config.ts` excludes application routes outside `/api/media/file/` from Workers Cache. Non-image file responses handled by the media header hook also opt out. OpenNext's existing internal caches and browser cache headers are preserved. No custom Worker wrapper or dashboard Cache Rule is needed.
 
-Match the media hostname and image or video extensions:
+On a cache miss, Payload retrieves the image from R2. On a hit, Cloudflare serves the cached image at the same `/api/media/file/` URL without executing Payload. This shared caching assumes the collection's current public read access (`read: () => true`); private media needs a different cache policy. File-route errors that do not reach the media header hook follow their response headers and Cloudflare's default cache behavior.
 
-```text
-(http.host eq "assets.yoursite.com" and http.request.uri.path.extension in {"avif" "gif" "jpg" "jpeg" "png" "svg" "webp" "mp4" "webm"})
-```
+After deploying, request the same uploaded image twice using `curl -sS -D - -o /dev/null https://yourdomain.com/api/media/file/example.jpg` and check for `CF-Cache-Status: HIT` on a repeated request. Also verify `/admin` and `/api/media` do not produce cache hits. Edge behavior must be verified on Cloudflare, not just with `pnpm dev`.
 
-Use these settings:
+Use a new filename when replacing an image so browsers fetch the new URL. Purge its Workers Cache entry if the old URL should stop being served from the edge. Purging cannot remove a copy already cached in a browser, and a TTL does not guarantee an object remains in edge cache until it expires.
 
-- **Cache eligibility:** Eligible for cache
-- **Edge TTL:** Ignore cache-control header and use **30 days**
-- **Browser TTL:** Override origin and use **1 hour**
-
-A Cloudflare cache purge cannot remove files already stored in visitors' browsers. When replacing a media file, use a new or versioned filename so its URL changes.
+### Deploy schema and application changes
 
 Before deploying schema changes, create a Payload migration:
 
@@ -128,7 +122,6 @@ pnpm deploy
 - **On-demand invalidation** is supported through D1-backed Next.js cache tags when application code revalidates tagged content.
 - **Deduplicated revalidation** uses a Durable Object queue to avoid repeated ISR work.
 - **Cloudflare image transformations** resize images at `/cdn-cgi/image`, negotiate the output format automatically, and default to quality 85.
-- **Direct media delivery** serves production uploads from the configured media hostname instead of proxying them through Payload.
 - **Static asset caching** keeps Next.js's hashed `/_next/static/*` files immutable for one year and manually managed `/static/*` files cached for 30 days.
 - **React Compiler** is enabled for automatic React rendering optimizations.
 - **Worker-aware bundling** keeps `jose` and `pg-cloudflare` external for the workerd runtime.
