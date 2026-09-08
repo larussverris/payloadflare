@@ -1,0 +1,33 @@
+{
+  "name": "@payloadflare/live-preview",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./next": "./src/components/LivePreviewProvider.tsx"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit --pretty false"
+  },
+  "dependencies": {
+    "@payloadcms/live-preview-react": "catalog:",
+    "@payloadcms/admin-bar": "catalog:",
+    "server-only": "0.0.1"
+  },
+  "peerDependencies": {
+    "payload": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "payload": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:"
+  }
+}

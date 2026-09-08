@@ -2,7 +2,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@payloadflare/email-cloudflare'],
+  transpilePackages: ['@payloadflare/email-cloudflare', '@payloadflare/live-preview'],
   images: {
     // Follow OpenNext's custom-loader setup to serve transformed images directly
     // instead of routing them through `/_next/image`.
