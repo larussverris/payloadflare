@@ -2,19 +2,19 @@
 
 Edit content in Payload and see the page update after each save or autosave.
 The website and Payload admin must use the same origin.
-Pass that origin to the provider, such as `http://localhost:3000` in development
+Pass that origin to the component, such as `http://localhost:3000` in development
 or `https://example.com` in production, without a path or trailing slash. The
-provider passes it to the admin bar and refresh listener.
+component passes it to the admin bar and refresh listener.
 
 ## Source structure
 
 - `src/index.ts`: Payload plugin configuration and registration.
-- `src/components/`: the server layout provider and a client component combining
+- `src/components/`: the server preview component and a client component combining
   the admin bar with the refresh listener.
 - `src/server/`: draft defaults, preview entry endpoint, URL helpers, and Payload reads.
 
 Public imports remain `@payloadflare/live-preview` for the plugin and
-`@payloadflare/live-preview/next` for `LivePreviewProvider`.
+`@payloadflare/live-preview/next` for `LivePreview`.
 
 ## 1. Select your collections and globals
 
@@ -74,20 +74,19 @@ It creates the preview endpoints for you; no extra API route files are needed.
 ## 3. Mark your page queries
 
 Keep using `getPayload`. Add `context: { livePreview: true }` to participating
-`find`, `findByID`, and `findGlobal` calls. Wrap your shared frontend layout with
-`<LivePreviewProvider>` to show a draft-mode banner and refresh after saves:
+`find`, `findByID`, and `findGlobal` calls. Render `<LivePreview />` in your shared
+frontend layout to show a draft-mode banner and refresh after saves:
 
 ```tsx
 import type { ReactNode } from 'react'
-import { LivePreviewProvider } from '@payloadflare/live-preview/next'
+import { LivePreview } from '@payloadflare/live-preview/next'
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <LivePreviewProvider origin={process.env.NEXT_PUBLIC_SERVER_URL!}>
-          {children}
-        </LivePreviewProvider>
+        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!} />
+        {children}
       </body>
     </html>
   )
@@ -96,17 +95,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
 Set `NEXT_PUBLIC_SERVER_URL` to the origin used to open the app in each environment.
 
-The provider uses `@payloadcms/admin-bar` with a draft-mode label, dashboard/account
+The component uses `@payloadcms/admin-bar` with a draft-mode label, dashboard/account
 links, and an exit-preview button that disables Draft Mode through a server action
-imported by the provider. Next.js re-renders the current page with the updated
+imported by the component. Next.js re-renders the current page with the updated
 cookie, so no exit endpoint or redirect is needed. The bar is
 shown to authenticated users in Draft Mode in a normal browser tab. It is hidden
 inside iframes, including Payload's split preview; save-triggered refreshes still
-run there. The provider accepts `children` and a required `origin`. The admin bar uses Payload's
+run there. The component requires an `origin` prop. The admin bar uses Payload's
 defaults: `/admin`, `/api`, and the `users` auth collection.
 
-The provider mounts the admin bar and refresh listener automatically in Draft Mode.
-Wrap your shared frontend layout once; no preview components are needed in pages.
+The component mounts the admin bar and refresh listener automatically in Draft Mode.
+Render it once in your shared frontend layout; no preview components are needed in pages.
 
 ```tsx
 import config from '@payload-config'
@@ -169,7 +168,7 @@ Mode and remain on the current page. The plugin only registers the authenticated
 - **Unknown slug:** register the schema before listing it in the plugin.
 - **No preview button:** set `admin.livePreview.url` on the selected schema.
 - **Page not found:** create the page at that URL.
-- **Changes do not appear:** check the selected slugs, query markers, `<LivePreviewProvider>`, and autosave settings.
+- **Changes do not appear:** check the selected slugs, query markers, `<LivePreview>`, and autosave settings.
 - **Request-context error:** call marked reads from a Next.js server page or route, outside shared caches. In scripts, omit the marker or pass an explicit `draft` value.
 - **Sign-in error:** open admin and website on the same domain and port, then sign in.
 - **Visitors can see unpublished content:** review your query filters and access policy; the marker does not enforce published-only public reads.

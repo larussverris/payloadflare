@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./next": "./src/components/LivePreviewProvider.tsx"
+    "./next": "./src/components/LivePreview.tsx"
   },
   "scripts": {
     "typecheck": "tsc --noEmit --pretty false"
