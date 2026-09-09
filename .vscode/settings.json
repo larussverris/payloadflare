@@ -31,6 +31,30 @@
     "editor.formatOnSave": true
   },
   "editor.formatOnSaveMode": "file",
+  "files.exclude": {
+    ".next/**": true,
+    ".open-next/**": true,
+    ".pnpm-store/**": true,
+    ".turbo/**": true,
+    ".wrangler/**": true,
+    "cloudflare-env.d.ts": true,
+    "coverage/**": true,
+    "node_modules/**": true,
+    "src/payload-types.ts": true
+  },
+  "search.exclude": {
+    ".agents/**": true,
+    ".next/**": true,
+    ".open-next/**": true,
+    ".pnpm-store/**": true,
+    ".turbo/**": true,
+    ".vscode/**": true,
+    ".wrangler/**": true,
+    "coverage/**": true,
+    "node_modules/**": true,
+    "packages/**": true,
+    "src/app/(payload)/**": true
+  },
   "js/ts.tsdk.path": "node_modules/typescript/lib",
   "js/ts.tsdk.promptToUseWorkspaceVersion": true,
   "[javascript][typescript][typescriptreact]": {
