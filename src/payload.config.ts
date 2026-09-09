@@ -89,7 +89,7 @@ export default buildConfig({
       bucket: cloudflare.env.R2,
       collections: { media: true },
     }),
-    versionedFilenames({ collections: ['media'] }),
+    versionedFilenames({}),
   ],
   upload: {
     abortOnLimit: true,

@@ -4,7 +4,7 @@ import { versionedFilenames } from './index.ts'
 
 const media = () => ({ slug: 'media', upload: true, fields: [] })
 const configure = (collection = media()) =>
-  versionedFilenames({ collections: ['media'] })({ collections: [collection] }).collections[0]
+  versionedFilenames()({ collections: [collection] }).collections[0]
 
 async function runHooks(collection, args) {
   for (const hook of collection.hooks.beforeOperation) {

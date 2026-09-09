@@ -2,8 +2,8 @@ import { extname } from 'node:path'
 import type { CollectionBeforeOperationHook, Plugin } from 'payload'
 
 export interface VersionedFilenamesOptions {
-  /** Slugs of upload collections that should receive random filenames. */
-  collections: string[]
+  /** Slugs of upload collections that should receive random filenames. Defaults to `media`. */
+  collections?: string[]
 }
 
 const versionFilename: CollectionBeforeOperationHook = ({ operation, req }) => {
@@ -14,7 +14,9 @@ const versionFilename: CollectionBeforeOperationHook = ({ operation, req }) => {
   req.file.name = `${crypto.randomUUID().replaceAll('-', '')}${extname(req.file.name)}`
 }
 
-export const versionedFilenames = ({ collections }: VersionedFilenamesOptions): Plugin => {
+export const versionedFilenames = (
+  { collections = ['media'] }: VersionedFilenamesOptions = {},
+): Plugin => {
   const selected = new Set(collections)
 
   return (config) => ({

@@ -8,9 +8,11 @@ For example, `photo.jpg` becomes `5b31b5b8788c435c98560ccba12fb086.jpg`.
 import { versionedFilenames } from '@payloadflare/versioned-filenames'
 
 // In your Payload config:
-plugins: [versionedFilenames({ collections: ['media'] })]
+plugins: [versionedFilenames()]
 ```
 
+The plugin targets the `media` collection by default. Pass
+`{ collections: ['assets', 'documents'] }` to select different upload collections.
 Only the selected upload-enabled collections are modified. Metadata-only edits
 keep the existing filename, and existing files are not renamed retroactively.
 Existing collection hooks are preserved; the filename hook runs after existing
