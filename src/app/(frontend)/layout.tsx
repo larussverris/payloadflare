@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import React from 'react'
+import { LivePreview } from '@payloadflare/live-preview/next'
 
 import { mergeOpenGraph } from '@/lib/seo/mergeOpenGraph'
 
@@ -17,6 +18,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
+        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!} />
         <main>{children}</main>
       </body>
     </html>

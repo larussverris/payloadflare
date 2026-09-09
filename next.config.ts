@@ -2,7 +2,11 @@ import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@payloadflare/email-cloudflare', '@payloadflare/versioned-filenames'],
+  transpilePackages: [
+    '@payloadflare/email-cloudflare',
+    '@payloadflare/versioned-filenames',
+    '@payloadflare/live-preview',
+  ],
   async headers() {
     return [
       {

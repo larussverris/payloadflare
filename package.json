@@ -26,6 +26,7 @@
     "@opennextjs/cloudflare": "^1.20.4",
     "@payloadflare/email-cloudflare": "workspace:*",
     "@payloadflare/versioned-filenames": "workspace:*",
+    "@payloadflare/live-preview": "workspace:*",
     "@payloadcms/db-d1-sqlite": "catalog:",
     "@payloadcms/next": "catalog:",
     "@payloadcms/plugin-form-builder": "catalog:",

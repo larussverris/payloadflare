@@ -6,7 +6,13 @@ settings:
 
 catalogs:
   default:
+    '@payloadcms/admin-bar':
+      specifier: 3.88.0
+      version: 3.88.0
     '@payloadcms/db-d1-sqlite':
+      specifier: 3.88.0
+      version: 3.88.0
+    '@payloadcms/live-preview-react':
       specifier: 3.88.0
       version: 3.88.0
     '@payloadcms/next':
@@ -77,6 +83,9 @@ importers:
       '@payloadflare/email-cloudflare':
         specifier: workspace:*
         version: link:packages/email-cloudflare
+      '@payloadflare/live-preview':
+        specifier: workspace:*
+        version: link:packages/live-preview
       '@payloadflare/versioned-filenames':
         specifier: workspace:*
         version: link:packages/versioned-filenames
@@ -147,6 +156,40 @@ importers:
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@24.12.3)(@vitest/coverage-v8@4.1.11)(happy-dom@20.12.0)(vite@8.2.2(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass@1.77.4)(terser@5.16.9)(tsx@4.22.4)(yaml@2.9.0))
+
+  packages/live-preview:
+    dependencies:
+      '@payloadcms/admin-bar':
+        specifier: 'catalog:'
+        version: 3.88.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      '@payloadcms/live-preview-react':
+        specifier: 'catalog:'
+        version: 3.88.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+      server-only:
+        specifier: 0.0.1
+        version: 0.0.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.3
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.14
+      next:
+        specifier: 'catalog:'
+        version: 16.3.3(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@24.12.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4)
+      payload:
+        specifier: 'catalog:'
+        version: 3.88.0(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.8(react@19.2.8)
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
 
   packages/versioned-filenames:
     devDependencies:
@@ -1896,6 +1939,12 @@ packages:
   '@oxc-project/types@0.147.0':
     resolution: {integrity: sha512-IJ3s6ltHLp45S0bh7phkX+gJO7A1Wuz2EaqpAhb8WjqDwbzMiWKHhyyT42tskaWjEYXtHtVCPpnBJVT9+dcRLg==}
 
+  '@payloadcms/admin-bar@3.88.0':
+    resolution: {integrity: sha512-9xkr01jOQkQNx+idxhcxcakxUim7wk3RS4mB5rwX51pQ24/8o2TBqx3gMfGxALoP5bmqTUKo3hQQkllH1zEuwg==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+
   '@payloadcms/db-d1-sqlite@3.88.0':
     resolution: {integrity: sha512-85kPzxII+y4WZCRa3DIgrIe9WqiTuZOGg2V3wVgJ6nEjXcgiyCnuIxBTCaEdF6e0N8eKtP8NMBzQF8eY2lBdDA==}
     peerDependencies:
@@ -1912,6 +1961,15 @@ packages:
     peerDependencies:
       graphql: ^16.8.1
       payload: 3.88.0
+
+  '@payloadcms/live-preview-react@3.88.0':
+    resolution: {integrity: sha512-Pmlo1xczmOetyyC4rhtp50b0/biYE62+w09hKImN26v8DBNCqZ8b699mknOCo60mar4V4KrlvksCpL9t2e0dHA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+      react-dom: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.1 || ^19.1.2 || ^19.2.1
+
+  '@payloadcms/live-preview@3.88.0':
+    resolution: {integrity: sha512-Be6bC3j1Yd+rDfjRKz2MVtfr8hJUHG+jLeRaN2yWjQRoWCxFB9srBmob8FXD7azTS73d56hrDCNyzQx5HbgK6A==}
 
   '@payloadcms/next@3.88.0':
     resolution: {integrity: sha512-3f2YOGSmtTp85YnlJm9FusRgshKJbiLI8uXs8iQNMwU7RZJnLCURG8iv/6sjKHO0owIfw3vIL5qgxdtIBuQwpA==}
@@ -4937,6 +4995,9 @@ packages:
     resolution: {integrity: sha512-xRXBn0pPqQTVQiC8wyQrKs2MOlX24zQ0POGaj0kultvoOCstBQM5yvOhAVSUwOMjQtTvsPWoNCHfPGwaaQJhTw==}
     engines: {node: '>= 18'}
 
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+
   set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}
     engines: {node: '>= 0.4'}
@@ -7398,6 +7459,11 @@ snapshots:
 
   '@oxc-project/types@0.147.0': {}
 
+  '@payloadcms/admin-bar@3.88.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
   '@payloadcms/db-d1-sqlite@3.88.0(payload@3.88.0(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3))(supports-color@10.2.2)':
     dependencies:
       '@payloadcms/drizzle': 3.88.0(payload@3.88.0(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3))
@@ -7490,6 +7556,14 @@ snapshots:
       tsx: 4.22.4
     transitivePeerDependencies:
       - typescript
+
+  '@payloadcms/live-preview-react@3.88.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+    dependencies:
+      '@payloadcms/live-preview': 3.88.0
+      react: 19.2.8
+      react-dom: 19.2.8(react@19.2.8)
+
+  '@payloadcms/live-preview@3.88.0': {}
 
   '@payloadcms/next@3.88.0(@types/react@19.2.14)(graphql@16.14.2)(monaco-editor@0.56.0)(next@16.3.3(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@24.12.3)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(sass@1.77.4))(payload@3.88.0(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(typescript@6.0.3)':
     dependencies:
@@ -10968,6 +11042,8 @@ snapshots:
       send: 1.2.1(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
+
+  server-only@0.0.1: {}
 
   set-function-length@1.2.2:
     dependencies:
