@@ -2,7 +2,9 @@
 
 import { draftMode } from 'next/headers'
 
-export async function exitPreviewAction() {
+async function exitPreviewAction() {
   const draft = await draftMode()
   draft.disable()
 }
+
+export { exitPreviewAction }
