@@ -1,11 +1,13 @@
 import 'server-only'
 
 import { draftMode } from 'next/headers'
+import type { ReactNode } from 'react'
 
 import { exitPreviewAction } from '../server/exitPreviewAction'
-import { PreviewAdminBar } from './PreviewAdminBar'
+import { LivePreviewShell } from './LivePreviewShell'
 
 type LivePreviewProps = {
+  children: ReactNode
   origin: string
 }
 
@@ -13,15 +15,18 @@ type LivePreviewProps = {
 async function LivePreview(props: LivePreviewProps) {
   const { isEnabled } = await draftMode()
 
-  if (!isEnabled) return null
+  // If Draft Mode is not enabled, render the page normally.
+  if (!isEnabled) return props.children
 
   return (
-    <PreviewAdminBar
+    <LivePreviewShell
       cmsURL={props.origin}
       preview
       onPreviewExit={exitPreviewAction}
-      style={{ position: 'sticky' }}
-    />
+      style={{ position: 'relative', zIndex: 'unset' }}
+    >
+      {props.children}
+    </LivePreviewShell>
   )
 }
 

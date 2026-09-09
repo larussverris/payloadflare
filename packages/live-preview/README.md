@@ -9,8 +9,8 @@ component passes it to the admin bar and refresh listener.
 ## Source structure
 
 - `src/index.ts`: Payload plugin configuration and registration.
-- `src/components/`: the server preview component and a client component combining
-  the admin bar with the refresh listener.
+- `src/components/`: the server preview boundary, client iframe shell, admin bar,
+  and save-refresh listener.
 - `src/server/`: draft defaults, preview entry endpoint, URL helpers, and Payload reads.
 
 Public imports remain `@payloadflare/live-preview` for the plugin and
@@ -85,8 +85,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!} />
-        {children}
+        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!}>
+          {children}
+        </LivePreview>
       </body>
     </html>
   )
@@ -98,11 +99,11 @@ Set `NEXT_PUBLIC_SERVER_URL` to the origin used to open the app in each environm
 The component uses `@payloadcms/admin-bar` with a draft-mode label, dashboard/account
 links, and an exit-preview button that disables Draft Mode through a server action
 imported by the component. Next.js re-renders the current page with the updated
-cookie, so no exit endpoint or redirect is needed. The bar is
-shown to authenticated users in Draft Mode in a normal browser tab. It is hidden
-inside iframes, including Payload's split preview; save-triggered refreshes still
-run there. The component requires an `origin` prop. The admin bar uses Payload's
-defaults: `/admin`, `/api`, and the `users` auth collection.
+cookie, so no exit endpoint or redirect is needed. In a normal browser tab, the bar
+sits above a full-size preview iframe. Inside an iframe, including Payload's split
+preview, only the page and save-triggered refresh listener are rendered. The
+component requires an `origin` prop and wraps the frontend layout's children. The
+admin bar uses Payload's defaults: `/admin`, `/api`, and the `users` auth collection.
 
 The component mounts the admin bar and refresh listener automatically in Draft Mode.
 Render it once in your shared frontend layout; no preview components are needed in pages.

@@ -14,7 +14,7 @@ catalog:
   payload: &payloadVersion 3.88.0
   '@payloadcms/admin-bar': *payloadVersion
   '@payloadcms/db-d1-sqlite': *payloadVersion
-  '@payloadcms/live-preview-react': *payloadVersion
+  '@payloadcms/live-preview': *payloadVersion
   '@payloadcms/next': *payloadVersion
   '@payloadcms/plugin-form-builder': *payloadVersion
   '@payloadcms/richtext-lexical': *payloadVersion

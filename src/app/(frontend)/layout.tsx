@@ -18,8 +18,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>
-        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!} />
-        <main>{children}</main>
+        <LivePreview origin={process.env.NEXT_PUBLIC_SERVER_URL!}>
+          <main>{children}</main>
+        </LivePreview>
       </body>
     </html>
   )

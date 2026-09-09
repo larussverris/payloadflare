@@ -11,8 +11,8 @@
     "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
-    "@payloadcms/live-preview-react": "catalog:",
     "@payloadcms/admin-bar": "catalog:",
+    "@payloadcms/live-preview": "catalog:",
     "server-only": "0.0.1"
   },
   "peerDependencies": {
