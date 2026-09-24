@@ -55,6 +55,20 @@ Resolve any merge conflicts, then run the relevant checks before deploying.
 
 Replace the placeholder names and IDs in `wrangler.jsonc` with your Worker, D1, and R2 resources.
 
+### Workers Builds
+
+Under **Workers & Pages → your Worker → Settings → Builds**, use:
+
+| Setting           | Value                                    |
+| ----------------- | ---------------------------------------- |
+| Build command     | `pnpm exec opennextjs-cloudflare build`  |
+| Deploy command    | `pnpm exec opennextjs-cloudflare deploy` |
+| Version command   | `pnpm exec opennextjs-cloudflare upload` |
+| Root directory    | `/`                                      |
+| Production branch | `main`                                   |
+
+Set required build-time values under **Build variables and secrets**.
+
 The app uses:
 
 - `D1` for Payload data
