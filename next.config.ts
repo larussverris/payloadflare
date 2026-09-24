@@ -2,6 +2,9 @@ import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  // Broad development defaults for common private networks. Narrow these
+  // patterns to the IP addresses or hostnames used by your development setup.
+  allowedDevOrigins: ['10.*.*.*', '172.*.*.*', '192.168.*.*'],
   transpilePackages: [
     '@payloadflare/email-cloudflare',
     '@payloadflare/versioned-filenames',
