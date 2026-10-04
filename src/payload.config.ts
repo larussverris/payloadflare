@@ -58,6 +58,10 @@ const cloudflare =
 export default buildConfig({
   admin: {
     // https://payloadcms.com/docs/authentication/overview
+    autoLogin:
+      process.env.NODE_ENV === 'development' && process.env.DEV_AUTO_LOGIN_EMAIL
+        ? { email: process.env.DEV_AUTO_LOGIN_EMAIL }
+        : false,
     autoRefresh: true,
     user: Users.slug,
     importMap: {
