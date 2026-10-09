@@ -1,7 +1,7 @@
 import React from 'react'
 import { LivePreview } from '@payloadflare/live-preview/next'
 
-import './styles.css'
+import './globals.css'
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
