@@ -6,7 +6,7 @@ It is derived from [Payload's official Cloudflare D1 template](https://github.co
 
 > **Important:** This starter currently exceeds the Cloudflare Workers Free plan's script-size limit, so deployment requires a paid Workers plan.
 
-It includes authenticated admin users, public media uploads, a form builder, and a blank frontend. Data is stored in [D1](https://developers.cloudflare.com/d1/) and media in [R2](https://developers.cloudflare.com/r2/).
+It includes authenticated admin users, public media uploads, a form builder, and a frontend driven by the Pages collection. Data is stored in [D1](https://developers.cloudflare.com/d1/) and media in [R2](https://developers.cloudflare.com/r2/).
 
 ## Run locally
 
@@ -127,9 +127,43 @@ Deploy the database migration and application together:
 pnpm deploy
 ```
 
+## Pages and live preview
+
+Create and publish a page with slug `/` to render the homepage. Other pages use
+slugs such as `about` for `/about` or `about/team` for `/about/team`. One optional
+catch-all route renders all Payload pages. Avoid existing routes such as `admin`,
+`api`, and `my-route`. If you already have a page with slug `home`, change it to `/`.
+Missing and unpublished pages return 404 to public visitors.
+
+Add Image and Video blocks to a page's layout. Image selects an image from Media
+and supports an optional caption.
+Video selects an uploaded video and supports a caption and WebVTT
+closed captions with a language code. Videos render with playback controls and
+do not autoplay. All uploads use the template's existing 6 MiB size limit.
+Each block lives
+in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend renderer
+in `Component.tsx`. Register additional renderers in `src/components/BlocksRenderer.tsx`.
+
+Pages uses the existing [live preview plugin](packages/live-preview/README.md).
+Open Live Preview from the editor to render drafts and refresh after autosaves.
+Preview reads stay within the current request; public reads and the sitemap include
+only published pages. Set `NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
+
+## Page SEO
+
+Pages includes a **Content** tab and an **SEO** tab supplied by Payload's SEO plugin.
+The SEO tab stores each page's title, description, and sharing image in `meta`;
+images come from the existing Media collection. The plugin shares the Payload
+version pinned in the workspace catalog.
+
+The frontend renders Next.js metadata, canonical URLs, Open Graph, and Twitter
+sharing tags from these fields, falling back to Site Settings for the description
+and sharing image. The default homepage title is the site name; other pages fall
+back to their page title. Preview responses include a noindex directive.
+
 ## Optimizations
 
-- **Metadata caching** keeps `robots.txt` and `llms.txt` on the `max` cache profile and `sitemap.xml` on the `hours` profile.
+- **CMS metadata** serves the sitemap from published pages and `llms.txt` from Site Settings.
 - **Persistent Next.js cache** stores SSG, ISR, and data-cache entries in R2.
 - **Regional cache** keeps frequently read cache entries close to the Worker for up to one minute.
 - **D1 read replicas** use Payload's `first-primary` strategy for consistent reads with lower latency after the initial primary query.

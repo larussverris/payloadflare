@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    pages: Page;
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
@@ -80,6 +81,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -91,8 +93,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'site-settings': SiteSetting;
+  };
+  globalsSelect: {
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -162,6 +168,60 @@ export interface Media {
   filesize?: number | null;
   width?: number | null;
   height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  /**
+   * Use / for the homepage, about for /about, or about/team for /about/team.
+   */
+  slug: string;
+  layout?: (ImageBlock | VideoBlock)[] | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock".
+ */
+export interface ImageBlock {
+  image: number | Media;
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock".
+ */
+export interface VideoBlock {
+  video: number | Media;
+  caption?: string | null;
+  /**
+   * Optional WebVTT (.vtt) file for accessible video captions.
+   */
+  captions?: (number | null) | Media;
+  /**
+   * Language code for the captions, such as en or is.
+   */
+  captionsLanguage?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'video';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -378,6 +438,10 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -464,6 +528,52 @@ export interface MediaSelect<T extends boolean = true> {
   filesize?: T;
   width?: T;
   height?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  layout?:
+    | T
+    | {
+        image?: T | ImageBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+      };
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock_select".
+ */
+export interface ImageBlockSelect<T extends boolean = true> {
+  image?: T;
+  caption?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock_select".
+ */
+export interface VideoBlockSelect<T extends boolean = true> {
+  video?: T;
+  caption?: T;
+  captions?: T;
+  captionsLanguage?: T;
+  id?: T;
+  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -653,6 +763,103 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  /**
+   * The website name used in sharing previews and as the fallback homepage title.
+   */
+  siteName?: string | null;
+  /**
+   * Used in search and sharing previews when a page has no SEO description.
+   */
+  defaultDescription?: string | null;
+  /**
+   * Used when a page has no SEO image. Recommended size: 1200 × 630 pixels.
+   */
+  defaultSharingImage?: (number | null) | Media;
+  /**
+   * Public company details for search engines. Add the business name to enable this. Only fill in details that apply to your company.
+   */
+  business?: {
+    name?: string | null;
+    legalName?: string | null;
+    description?: string | null;
+    /**
+     * Use your company logo, rather than a social sharing photo.
+     */
+    logo?: (number | null) | Media;
+    email?: string | null;
+    /**
+     * Include the country code, for example +354.
+     */
+    telephone?: string | null;
+    address?: {
+      streetAddress?: string | null;
+      addressLocality?: string | null;
+      postalCode?: string | null;
+      /**
+       * Two-letter country code, for example IS for Iceland.
+       */
+      addressCountry?: string | null;
+    };
+    /**
+     * Links to official company profiles, such as Facebook, Instagram, or LinkedIn.
+     */
+    profiles?:
+      | {
+          url: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  /**
+   * Information about the website for AI tools, published automatically at /llms.txt. You can usually leave this unchanged. Leave blank to disable the file.
+   */
+  llmsText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  siteName?: T;
+  defaultDescription?: T;
+  defaultSharingImage?: T;
+  business?:
+    | T
+    | {
+        name?: T;
+        legalName?: T;
+        description?: T;
+        logo?: T;
+        email?: T;
+        telephone?: T;
+        address?:
+          | T
+          | {
+              streetAddress?: T;
+              addressLocality?: T;
+              postalCode?: T;
+              addressCountry?: T;
+            };
+        profiles?:
+          | T
+          | {
+              url?: T;
+              id?: T;
+            };
+      };
+  llmsText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

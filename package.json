@@ -30,6 +30,7 @@
     "@payloadcms/db-d1-sqlite": "catalog:",
     "@payloadcms/next": "catalog:",
     "@payloadcms/plugin-form-builder": "catalog:",
+    "@payloadcms/plugin-seo": "catalog:",
     "@payloadcms/richtext-lexical": "catalog:",
     "@payloadcms/storage-r2": "catalog:",
     "@payloadcms/ui": "catalog:",

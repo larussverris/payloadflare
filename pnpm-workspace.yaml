@@ -17,6 +17,7 @@ catalog:
   '@payloadcms/live-preview': *payloadVersion
   '@payloadcms/next': *payloadVersion
   '@payloadcms/plugin-form-builder': *payloadVersion
+  '@payloadcms/plugin-seo': *payloadVersion
   '@payloadcms/richtext-lexical': *payloadVersion
   '@payloadcms/storage-r2': *payloadVersion
   '@payloadcms/ui': *payloadVersion

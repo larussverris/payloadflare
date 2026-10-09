@@ -8,12 +8,19 @@ import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { seoPlugin } from '@payloadcms/plugin-seo'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 import { versionedFilenames } from '@payloadflare/versioned-filenames'
 import { livePreviewPlugin } from '@payloadflare/live-preview'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
+import { Pages } from './collections/Pages'
+import { SiteSettings } from './globals/SiteSettings'
+
+if (!process.env.NEXT_PUBLIC_SERVER_URL) {
+  throw new Error('NEXT_PUBLIC_SERVER_URL must be set.')
+}
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -68,8 +75,8 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media],
-  globals: [],
+  collections: [Users, Media, Pages],
+  globals: [SiteSettings],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -80,11 +87,22 @@ export default buildConfig({
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
+    seoPlugin({
+      collections: [Pages.slug],
+      uploadsCollection: Media.slug,
+      tabbedUI: true,
+    }),
     livePreviewPlugin({
-      collections: [],
+      collections: [Pages.slug],
       globals: [],
     }),
     formBuilderPlugin({
+      formOverrides: {
+        admin: { group: 'Administration' },
+      },
+      formSubmissionOverrides: {
+        admin: { group: 'Administration' },
+      },
       fields: {
         payment: false,
       },
