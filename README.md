@@ -131,8 +131,8 @@ pnpm deploy
 
 Create and publish a page with slug `/` to render the homepage. Other pages use
 slugs such as `about` for `/about` or `about/team` for `/about/team`. One optional
-catch-all route renders all Payload pages. Avoid existing routes such as `admin`,
-`api`, and `my-route`. If you already have a page with slug `home`, change it to `/`.
+catch-all route renders all Payload pages. Avoid existing routes such as `admin`
+and `api`. If you already have a page with slug `home`, change it to `/`.
 Missing and unpublished pages return 404 to public visitors.
 
 Add Image and Video blocks to a page's layout. Image selects an image from Media
