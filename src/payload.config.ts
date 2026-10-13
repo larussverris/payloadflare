@@ -9,6 +9,7 @@ import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 import { versionedFilenames } from '@payloadflare/versioned-filenames'
 import { livePreviewPlugin } from '@payloadflare/live-preview'
@@ -17,6 +18,9 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { SiteSettings } from './globals/SiteSettings'
+import { NotFoundPage } from './globals/NotFoundPage'
+import { getPagePath } from './lib/pages/getPagePath'
+import { resolvePagePath } from './lib/pages/resolvePagePath'
 
 if (!process.env.NEXT_PUBLIC_SERVER_URL) {
   throw new Error('NEXT_PUBLIC_SERVER_URL must be set.')
@@ -76,7 +80,7 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Pages],
-  globals: [SiteSettings],
+  globals: [SiteSettings, NotFoundPage],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -87,14 +91,24 @@ export default buildConfig({
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
+    nestedDocsPlugin({
+      collections: ['pages'],
+      parentFieldSlug: 'parent',
+      generateLabel: (_, doc) => String(doc.title || doc.slug || ''),
+      generateURL: (docs) => getPagePath(docs.map((doc) => String(doc.slug || '')).join('/')),
+    }),
     seoPlugin({
-      collections: [Pages.slug],
       uploadsCollection: Media.slug,
       tabbedUI: true,
+      generateURL: async ({ doc, req, globalSlug }) => {
+        if (globalSlug === SiteSettings.slug) return process.env.NEXT_PUBLIC_SERVER_URL!
+        const pathname = await resolvePagePath(doc, req)
+        return pathname ? new URL(pathname, process.env.NEXT_PUBLIC_SERVER_URL!).href : ''
+      },
     }),
     livePreviewPlugin({
       collections: [Pages.slug],
-      globals: [],
+      globals: [NotFoundPage.slug],
     }),
     formBuilderPlugin({
       formOverrides: {

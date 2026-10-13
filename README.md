@@ -25,9 +25,10 @@ PAYLOAD_SECRET=replace-with-a-random-secret
 NEXT_PUBLIC_SERVER_URL=http://localhost:3000
 ```
 
-Start the app:
+Initialize a new local database, then start the app:
 
 ```bash
+pnpm payload migrate
 pnpm dev
 ```
 
@@ -129,11 +130,18 @@ pnpm deploy
 
 ## Pages and live preview
 
-Create and publish a page with slug `/` to render the homepage. Other pages use
-slugs such as `about` for `/about` or `about/team` for `/about/team`. One optional
-catch-all route renders all Payload pages. Avoid existing routes such as `admin`
-and `api`. If you already have a page with slug `home`, change it to `/`.
-Missing and unpublished pages return 404 to public visitors.
+The setup migration creates a protected **Home** document in Pages at `/`.
+Edit, publish, and unpublish it like any other page. Its slug is read-only, and it
+cannot have a parent or be deleted. Draft edits remain available; duplicating Home
+creates a regular page with a new slug.
+
+Create other pages with a single slug segment, such as `team`, and optionally
+choose a parent to produce a URL such as `/about/team`. One optional catch-all
+route renders Home and regular pages. Avoid existing routes such as `admin` and
+`api`. Missing and unpublished pages return 404 to public visitors.
+
+The editable 404 global is shown as a Payload UI card below the Pages list and pagination. Unexpected errors
+use Next.js’s built-in error page.
 
 Add Image and Video blocks to a page's layout. Image selects an image from Media
 and supports an optional caption.

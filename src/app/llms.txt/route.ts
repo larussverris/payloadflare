@@ -3,13 +3,12 @@ import config from '@payload-config'
 
 export async function GET() {
   const payload = await getPayload({ config })
-  const { llmsText } = await payload.findGlobal({
+  const { enableLlmsText, llmsText } = await payload.findGlobal({
     slug: 'site-settings',
     depth: 0,
   })
 
-  // Return 404 if text is empty
-  if (!llmsText?.trim()) {
+  if (!enableLlmsText) {
     return new Response(null, {
       status: 404,
       headers: { 'Cache-Control': 'no-store' },

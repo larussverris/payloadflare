@@ -95,9 +95,11 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     'site-settings': SiteSetting;
+    'not-found-page': NotFoundPage;
   };
   globalsSelect: {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'not-found-page': NotFoundPageSelect<false> | NotFoundPageSelect<true>;
   };
   locale: null;
   widgets: {
@@ -175,20 +177,37 @@ export interface Media {
  */
 export interface Page {
   id: number;
+  kind: 'page' | 'home';
   title: string;
-  /**
-   * Use / for the homepage, about for /about, or about/team for /about/team.
-   */
-  slug: string;
+  pathname?: string | null;
   layout?: (ImageBlock | VideoBlock)[] | null;
   meta?: {
-    title?: string | null;
     description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
     image?: (number | null) | Media;
   };
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * Use one URL segment, such as team. Choose a parent for /about/team. Edit the Home entry in Pages.
+   */
+  slug: string;
+  /**
+   * Leave empty for a top-level page.
+   */
+  parent?: (number | null) | Page;
+  breadcrumbs?:
+    | {
+        doc?: (number | null) | Page;
+        url?: string | null;
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -534,8 +553,9 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
+  kind?: T;
   title?: T;
-  slug?: T;
+  pathname?: T;
   layout?:
     | T
     | {
@@ -545,9 +565,19 @@ export interface PagesSelect<T extends boolean = true> {
   meta?:
     | T
     | {
-        title?: T;
         description?: T;
         image?: T;
+      };
+  generateSlug?: T;
+  slug?: T;
+  parent?: T;
+  breadcrumbs?:
+    | T
+    | {
+        doc?: T;
+        url?: T;
+        label?: T;
+        id?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -771,17 +801,20 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 export interface SiteSetting {
   id: number;
   /**
-   * The website name used in sharing previews and as the fallback homepage title.
+   * The small icon shown in browser tabs and bookmarks. Choose a square PNG, SVG, or ICO image.
    */
-  siteName?: string | null;
+  favicon?: (number | null) | Media;
   /**
-   * Used in search and sharing previews when a page has no SEO description.
+   * Default search and sharing information. Individual pages can override these values in their SEO tab.
    */
-  defaultDescription?: string | null;
-  /**
-   * Used when a page has no SEO image. Recommended size: 1200 × 630 pixels.
-   */
-  defaultSharingImage?: (number | null) | Media;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
   /**
    * Public company details for search engines. Add the business name to enable this. Only fill in details that apply to your company.
    */
@@ -818,9 +851,25 @@ export interface SiteSetting {
       | null;
   };
   /**
-   * Information about the website for AI tools, published automatically at /llms.txt. You can usually leave this unchanged. Leave blank to disable the file.
+   * Publish information about your website for AI tools at /llms.txt.
+   */
+  enableLlmsText?: boolean | null;
+  /**
+   * The text published at /llms.txt. Turning off AI information keeps this text for later.
    */
   llmsText?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-found-page".
+ */
+export interface NotFoundPage {
+  id: number;
+  title: string;
+  layout?: (ImageBlock | VideoBlock)[] | null;
+  _status?: ('draft' | 'published') | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -829,9 +878,14 @@ export interface SiteSetting {
  * via the `definition` "site-settings_select".
  */
 export interface SiteSettingsSelect<T extends boolean = true> {
-  siteName?: T;
-  defaultDescription?: T;
-  defaultSharingImage?: T;
+  favicon?: T;
+  meta?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        image?: T;
+      };
   business?:
     | T
     | {
@@ -856,7 +910,25 @@ export interface SiteSettingsSelect<T extends boolean = true> {
               id?: T;
             };
       };
+  enableLlmsText?: T;
   llmsText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-found-page_select".
+ */
+export interface NotFoundPageSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        image?: T | ImageBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+      };
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

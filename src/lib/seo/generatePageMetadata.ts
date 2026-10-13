@@ -4,7 +4,7 @@ import type { Config, Page } from '@/payload-types'
 import { getPagePath } from '@/lib/pages/getPagePath'
 
 type Props = {
-  page: Page
+  page: Pick<Page, 'title' | 'meta'> & { pathname?: string | null }
   settings: Config['globals']['site-settings']
   slug: string
   siteURL: string
@@ -18,16 +18,11 @@ export function generatePageMetadata({
   siteURL,
   isPreview,
 }: Props): Metadata {
-  const siteName = settings.siteName || 'Your Website Name'
-  let title = page.title || siteName
-  if (page.meta?.title) {
-    title = page.meta.title
-  } else if (slug === '/') {
-    title = siteName
-  }
+  const siteTitle = settings.meta?.title || 'Your Website Name'
+  const title = page.title || siteTitle
 
-  const description = page.meta?.description || settings.defaultDescription || undefined
-  const path = getPagePath(slug)
+  const description = page.meta?.description || settings.meta?.description || undefined
+  const path = page.pathname || getPagePath(slug)
   const metadata: Metadata = {
     metadataBase: new URL(siteURL),
     title,
@@ -37,7 +32,7 @@ export function generatePageMetadata({
       type: 'website',
       title,
       description,
-      siteName,
+      siteName: settings.meta?.title || undefined,
       url: path,
     },
     twitter: {
@@ -47,7 +42,7 @@ export function generatePageMetadata({
     },
   }
 
-  const image = page.meta?.image || settings.defaultSharingImage
+  const image = page.meta?.image || settings.meta?.image
   if (image && typeof image === 'object' && image.url) {
     const sharingImage = {
       url: image.url,

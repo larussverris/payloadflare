@@ -5,11 +5,12 @@ import { getPayload } from 'payload'
 
 import { BlocksRenderer } from '@/components/BlocksRenderer'
 import { generatePageMetadata } from '@/lib/seo/generatePageMetadata'
+import { getPagePath } from '@/lib/pages/getPagePath'
 
 type Props = { params: Promise<{ slug?: string[] }> }
 
 export default async function Page({ params }: Props) {
-  const { slug } = await params
+  const { slug = [] } = await params
   const { isEnabled } = await draftMode()
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
@@ -18,7 +19,7 @@ export default async function Page({ params }: Props) {
     pagination: false,
     overrideAccess: isEnabled,
     context: { livePreview: true },
-    where: { slug: { equals: slug?.join('/') || '/' } },
+    where: { pathname: { equals: getPagePath(slug.join('/')) } },
   })
   const page = docs[0]
   if (!page) notFound()
@@ -27,8 +28,8 @@ export default async function Page({ params }: Props) {
 }
 
 export async function generateMetadata({ params }: Props) {
-  const { slug } = await params
-  const pageSlug = slug?.join('/') || '/'
+  const { slug = [] } = await params
+  const pageSlug = slug.join('/')
   const { isEnabled } = await draftMode()
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
@@ -37,7 +38,7 @@ export async function generateMetadata({ params }: Props) {
     pagination: false,
     overrideAccess: isEnabled,
     context: { livePreview: true },
-    where: { slug: { equals: pageSlug } },
+    where: { pathname: { equals: getPagePath(pageSlug) } },
   })
   const page = docs[0]
   if (!page) notFound()
