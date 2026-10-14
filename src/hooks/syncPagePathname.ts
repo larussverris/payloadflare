@@ -2,7 +2,7 @@ import type { CollectionBeforeChangeHook } from 'payload'
 
 /** The plugin populates breadcrumbs first, including on cascading child updates. */
 export const syncPagePathname: CollectionBeforeChangeHook = ({ data, originalDoc }) => {
-  if (originalDoc?.kind === 'home') {
+  if (data.kind === 'home' || originalDoc?.kind === 'home') {
     data.pathname = '/'
     return data
   }

@@ -3,6 +3,7 @@
 import type { GlobalConfig } from 'payload'
 import { MetaTitleField } from '@payloadcms/plugin-seo/fields'
 
+import { Button } from '../blocks/Button/config'
 import { Image } from '../blocks/Image/config'
 import { Video } from '../blocks/Video/config'
 import { revalidateSite } from '../hooks/revalidateSite'
@@ -38,7 +39,7 @@ export const NotFoundPage: GlobalConfig = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [Image, Video],
+              blocks: [Image, Video, Button],
             },
           ],
         },

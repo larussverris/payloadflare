@@ -13,6 +13,7 @@ import { resolvePagePath } from '@/lib/pages/resolvePagePath'
 import { syncPagePathname } from '@/hooks/syncPagePathname'
 import { createParentField, createBreadcrumbsField } from '@payloadcms/plugin-nested-docs'
 
+import { Button } from '../blocks/Button/config'
 import { Image } from '../blocks/Image/config'
 import { Video } from '../blocks/Video/config'
 
@@ -83,7 +84,7 @@ export const Pages: CollectionConfig = {
               name: 'layout',
               type: 'blocks',
               admin: { disableListColumn: true },
-              blocks: [Image, Video],
+              blocks: [Image, Video, Button],
             },
           ],
         },
@@ -122,8 +123,9 @@ export const Pages: CollectionConfig = {
                   slug.access = { update: ({ doc }) => doc?.kind !== 'home' }
                   slug.hooks = {
                     ...slug.hooks,
-                    beforeValidate: [({ value, originalDoc, path }) => {
+                    beforeValidate: [({ value, data, originalDoc, overrideAccess, path }) => {
                       if (originalDoc?.kind === 'home' || value === originalDoc?.slug) return value
+                      if (overrideAccess && data?.kind === 'home' && value === '/') return value
                       if (typeof value === 'string' && (
                         value.trim().replaceAll('/', '') === '' ||
                         value.includes('/') || value === '.' || value === '..'

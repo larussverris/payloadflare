@@ -7,6 +7,9 @@ OpenNext, Cloudflare D1, and R2.
 
 - Use `pnpm` exclusively. Do not introduce Yarn or npm lockfiles.
 - Keep application source in `src/`; root-level files are project configuration.
+- Keep each block in `src/blocks/<BlockName>/`, with its Payload schema in
+  `config.ts` and rendered implementation in `index.tsx`. Use named component
+  exports and import implementations from the block directory.
 - Use the existing project-local skills in `.agents/skills/<skill-name>/SKILL.md`
   when their technology applies.
 - For version-sensitive framework or platform behavior, consult the relevant

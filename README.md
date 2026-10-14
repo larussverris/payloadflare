@@ -150,7 +150,8 @@ closed captions with a language code. Videos render with playback controls and
 do not autoplay. All uploads use the template's existing 6 MiB size limit.
 Each block lives
 in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend renderer
-in `Component.tsx`. Register additional renderers in `src/components/BlocksRenderer.tsx`.
+in `index.tsx`. Use named component exports and import implementations from the
+block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
 
 Pages uses the existing [live preview plugin](packages/live-preview/README.md).
 Open Live Preview from the editor to render drafts and refresh after autosaves.
