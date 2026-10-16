@@ -10,7 +10,6 @@ import {
 import { resolvePagePath } from '@/lib/pages/resolvePagePath'
 import { createParentField } from '@payloadcms/plugin-nested-docs'
 
-import { Button } from '../blocks/Button/config'
 import { Hero } from '../blocks/Hero/config'
 import { Image } from '../blocks/Image/config'
 import { NotFound } from '../blocks/NotFound/config'
@@ -65,7 +64,7 @@ export const Pages: CollectionConfig = {
       name: 'layout',
       type: 'blocks',
       access: { update: canChangePageBlocks },
-      blocks: [Hero, Text, Image, Video, Button, NotFound],
+      blocks: [Hero, Text, Image, Video, NotFound],
     },
     {
       name: 'meta',

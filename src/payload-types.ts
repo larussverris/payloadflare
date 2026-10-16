@@ -176,7 +176,7 @@ export interface Media {
 export interface Page {
   id: number;
   title: string;
-  layout?: (HeroBlock | TextBlock | ImageBlock | VideoBlock | ButtonBlock | NotFoundBlock)[] | null;
+  layout?: (HeroBlock | TextBlock | ImageBlock | VideoBlock | NotFoundBlock)[] | null;
   meta?: {
     title?: string | null;
     description?: string | null;
@@ -255,38 +255,6 @@ export interface VideoBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'video';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ButtonBlock".
- */
-export interface ButtonBlock {
-  /**
-   * What visitors will see, such as Contact us or Download brochure.
-   */
-  label: string;
-  type: 'page' | 'url' | 'download' | 'phone' | 'email';
-  page?: (number | null) | Page;
-  /**
-   * For example example.com. We add https:// for you. You can also use /path.
-   */
-  url?: string | null;
-  file?: (number | null) | Media;
-  /**
-   * Include the country code, for example +354 555 1234.
-   */
-  phone?: string | null;
-  /**
-   * For example hello@example.com. Visitors will open their email app.
-   */
-  email?: string | null;
-  /**
-   * Keep this page open and open the destination in a new tab.
-   */
-  newTab?: boolean | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'button';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -618,7 +586,6 @@ export interface PagesSelect<T extends boolean = true> {
         text?: T | TextBlockSelect<T>;
         image?: T | ImageBlockSelect<T>;
         video?: T | VideoBlockSelect<T>;
-        button?: T | ButtonBlockSelect<T>;
         notFound?: T | NotFoundBlockSelect<T>;
       };
   meta?:
@@ -680,22 +647,6 @@ export interface VideoBlockSelect<T extends boolean = true> {
   video?: T;
   captions?: T;
   captionsLanguage?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ButtonBlock_select".
- */
-export interface ButtonBlockSelect<T extends boolean = true> {
-  label?: T;
-  type?: T;
-  page?: T;
-  url?: T;
-  file?: T;
-  phone?: T;
-  email?: T;
-  newTab?: T;
   id?: T;
   blockName?: T;
 }
