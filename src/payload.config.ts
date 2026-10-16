@@ -96,14 +96,14 @@ export default buildConfig({
     nestedDocsPlugin({
       collections: ['pages'],
       parentFieldSlug: 'parent',
-      generateURL: (docs) => getPagePath(docs.map((doc) => String(doc.slug || '')).join('/')),
+      generateURL: (docs) => getPagePath(docs),
     }),
     seoPlugin({
       uploadsCollection: Media.slug,
       tabbedUI: true,
+      collections: [],
       generateURL: async ({ doc, req, globalSlug }) => {
-        if (globalSlug === Preferences.slug) return process.env.NEXT_PUBLIC_SERVER_URL!
-        const pathname = await resolvePagePath(doc, req)
+        const pathname = globalSlug ? '/' : await resolvePagePath(doc, req)
         return pathname ? new URL(pathname, process.env.NEXT_PUBLIC_SERVER_URL!).href : ''
       },
     }),

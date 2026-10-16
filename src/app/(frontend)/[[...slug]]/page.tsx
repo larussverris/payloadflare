@@ -4,9 +4,16 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 
 import { BlocksRenderer } from '@/components/BlocksRenderer'
-import { generatePageMetadata } from '@/lib/seo/generatePageMetadata'
 import { getPagePath } from '@/lib/pages/getPagePath'
-import { getPagePathQuery } from '@/lib/pages/findPublishedPageByPath'
+import { generatePageMetadata } from '@/lib/seo/generatePageMetadata'
+function getPagePathQuery(pathname: string) {
+  return {
+    'breadcrumbs.url': { equals: pathname },
+    slug: {
+      equals: pathname === '/' ? 'home' : decodeURIComponent(pathname.split('/').filter(Boolean).at(-1) || ''),
+    },
+  }
+}
 
 type Props = { params: Promise<{ slug?: string[] }> }
 

@@ -7,8 +7,8 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { resolvePagePath } from '@/lib/pages/resolvePagePath'
 import { createParentField } from '@payloadcms/plugin-nested-docs'
+import { resolvePagePath } from '@/lib/pages/resolvePagePath'
 
 import { Hero } from '../blocks/Hero/config'
 import { Image } from '../blocks/Image/config'
@@ -89,6 +89,7 @@ export const Pages: CollectionConfig = {
           label: 'Parent page',
           access: { update: canChangePagePath },
           admin: {
+            condition: (data) => data.slug !== 'home' && data.slug !== '404',
             description: 'Leave empty for a top-level page.',
           },
         }),
