@@ -94,12 +94,10 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    'site-settings': SiteSetting;
-    'not-found-page': NotFoundPage;
+    preferences: Preference;
   };
   globalsSelect: {
-    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
-    'not-found-page': NotFoundPageSelect<false> | NotFoundPageSelect<true>;
+    preferences: PreferencesSelect<false> | PreferencesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -177,11 +175,10 @@ export interface Media {
  */
 export interface Page {
   id: number;
-  kind: 'page' | 'home';
   title: string;
-  pathname?: string | null;
-  layout?: (ImageBlock | VideoBlock | ButtonBlock)[] | null;
+  layout?: (HeroBlock | TextBlock | ImageBlock | VideoBlock | ButtonBlock | NotFoundBlock)[] | null;
   meta?: {
+    title?: string | null;
     description?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
@@ -192,9 +189,6 @@ export interface Page {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateSlug?: boolean | null;
-  /**
-   * Use one URL segment, such as team. Choose a parent for /about/team. Edit the Home entry in Pages.
-   */
   slug: string;
   /**
    * Leave empty for a top-level page.
@@ -214,11 +208,32 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  heading?: string | null;
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ImageBlock".
  */
 export interface ImageBlock {
   image: number | Media;
-  caption?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'image';
@@ -229,7 +244,6 @@ export interface ImageBlock {
  */
 export interface VideoBlock {
   video: number | Media;
-  caption?: string | null;
   /**
    * Optional WebVTT (.vtt) file for accessible video captions.
    */
@@ -273,6 +287,17 @@ export interface ButtonBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'button';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NotFoundBlock".
+ */
+export interface NotFoundBlock {
+  heading: string;
+  message?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'notFound';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -585,19 +610,21 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
-  kind?: T;
   title?: T;
-  pathname?: T;
   layout?:
     | T
     | {
+        hero?: T | HeroBlockSelect<T>;
+        text?: T | TextBlockSelect<T>;
         image?: T | ImageBlockSelect<T>;
         video?: T | VideoBlockSelect<T>;
         button?: T | ButtonBlockSelect<T>;
+        notFound?: T | NotFoundBlockSelect<T>;
       };
   meta?:
     | T
     | {
+        title?: T;
         description?: T;
         image?: T;
       };
@@ -618,11 +645,30 @@ export interface PagesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock_select".
+ */
+export interface HeroBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock_select".
+ */
+export interface TextBlockSelect<T extends boolean = true> {
+  heading?: T;
+  body?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ImageBlock_select".
  */
 export interface ImageBlockSelect<T extends boolean = true> {
   image?: T;
-  caption?: T;
   id?: T;
   blockName?: T;
 }
@@ -632,7 +678,6 @@ export interface ImageBlockSelect<T extends boolean = true> {
  */
 export interface VideoBlockSelect<T extends boolean = true> {
   video?: T;
-  caption?: T;
   captions?: T;
   captionsLanguage?: T;
   id?: T;
@@ -651,6 +696,16 @@ export interface ButtonBlockSelect<T extends boolean = true> {
   phone?: T;
   email?: T;
   newTab?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NotFoundBlock_select".
+ */
+export interface NotFoundBlockSelect<T extends boolean = true> {
+  heading?: T;
+  message?: T;
   id?: T;
   blockName?: T;
 }
@@ -845,9 +900,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "site-settings".
+ * via the `definition` "preferences".
  */
-export interface SiteSetting {
+export interface Preference {
   id: number;
   /**
    * The small icon shown in browser tabs and bookmarks. Choose a square PNG, SVG, or ICO image.
@@ -912,21 +967,9 @@ export interface SiteSetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "not-found-page".
+ * via the `definition` "preferences_select".
  */
-export interface NotFoundPage {
-  id: number;
-  title: string;
-  layout?: (ImageBlock | VideoBlock | ButtonBlock)[] | null;
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "site-settings_select".
- */
-export interface SiteSettingsSelect<T extends boolean = true> {
+export interface PreferencesSelect<T extends boolean = true> {
   favicon?: T;
   meta?:
     | T
@@ -961,24 +1004,6 @@ export interface SiteSettingsSelect<T extends boolean = true> {
       };
   enableLlmsText?: T;
   llmsText?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "not-found-page_select".
- */
-export interface NotFoundPageSelect<T extends boolean = true> {
-  title?: T;
-  layout?:
-    | T
-    | {
-        image?: T | ImageBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-        button?: T | ButtonBlockSelect<T>;
-      };
-  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

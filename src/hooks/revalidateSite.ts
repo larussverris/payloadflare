@@ -2,7 +2,7 @@ import { revalidatePath } from 'next/cache'
 import type { PayloadRequest } from 'payload'
 
 /**
- * Called by Payload after Pages saves/deletes and Preferences or 404 saves.
+ * Called by Payload after collection saves/deletes and global saves.
  * Invalidates the site's Next.js cache so visits reflect CMS changes.
  * Set context.disableRevalidate to skip, e.g. when seeding outside Next.js.
  */

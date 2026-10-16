@@ -13,15 +13,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     overrideAccess: false,
     depth: 0,
     pagination: false,
-    select: { pathname: true, updatedAt: true },
+    select: { breadcrumbs: true, updatedAt: true },
     where: { _status: { equals: 'published' } },
   })
   const siteURL = process.env.NEXT_PUBLIC_SERVER_URL!
 
   const entries: MetadataRoute.Sitemap = []
   for (const page of docs) {
-    const { pathname, updatedAt } = page
-    if (!pathname) continue
+    const pathname = page.breadcrumbs?.at(-1)?.url
+    const { updatedAt } = page
+    if (!pathname || pathname === '/404') continue
     entries.push({
       url: new URL(pathname, siteURL).href,
       lastModified: updatedAt,

@@ -1,8 +1,8 @@
-import * as migration_20250929_111647 from './20250929_111647';
-import * as migration_20260811_104401_add_form_builder from './20260811_104401_add_form_builder';
-import * as migration_20261009_021708_add_pages_and_site_settings from './20261009_021708_add_pages_and_site_settings';
-import * as migration_20261013_230005_update_pages_and_system_pages from './20261013_230005_update_pages_and_system_pages';
-import * as migration_20261014_142911_add_button_and_seed_homepage from './20261014_142911_add_button_and_seed_homepage';
+import * as migration_20250929_111647 from './20250929_111647'
+import * as migration_20260811_104401_add_form_builder from './20260811_104401_add_form_builder'
+import * as migration_20261016_171341_pages_schema from './20261016_171341_pages_schema'
+import * as migration_20261016_171342_create_home_page from './20261016_171342_create_home_page'
+import * as migration_20261016_171343_create_404_page from './20261016_171343_create_404_page'
 
 export const migrations = [
   {
@@ -16,18 +16,18 @@ export const migrations = [
     name: '20260811_104401_add_form_builder',
   },
   {
-    up: migration_20261009_021708_add_pages_and_site_settings.up,
-    down: migration_20261009_021708_add_pages_and_site_settings.down,
-    name: '20261009_021708_add_pages_and_site_settings',
+    up: migration_20261016_171341_pages_schema.up,
+    down: migration_20261016_171341_pages_schema.down,
+    name: '20261016_171341_pages_schema',
   },
   {
-    up: migration_20261013_230005_update_pages_and_system_pages.up,
-    down: migration_20261013_230005_update_pages_and_system_pages.down,
-    name: '20261013_230005_update_pages_and_system_pages',
+    up: migration_20261016_171342_create_home_page.up,
+    down: migration_20261016_171342_create_home_page.down,
+    name: '20261016_171342_create_home_page',
   },
   {
-    up: migration_20261014_142911_add_button_and_seed_homepage.up,
-    down: migration_20261014_142911_add_button_and_seed_homepage.down,
-    name: '20261014_142911_add_button_and_seed_homepage'
+    up: migration_20261016_171343_create_404_page.up,
+    down: migration_20261016_171343_create_404_page.down,
+    name: '20261016_171343_create_404_page',
   },
-];
+]

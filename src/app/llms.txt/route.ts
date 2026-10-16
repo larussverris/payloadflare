@@ -4,7 +4,7 @@ import config from '@payload-config'
 export async function GET() {
   const payload = await getPayload({ config })
   const { enableLlmsText, llmsText } = await payload.findGlobal({
-    slug: 'site-settings',
+    slug: 'preferences',
     depth: 0,
   })
 

@@ -4,8 +4,8 @@ import type { Config, Page } from '@/payload-types'
 import { getPagePath } from '@/lib/pages/getPagePath'
 
 type Props = {
-  page: Pick<Page, 'title' | 'meta'> & { pathname?: string | null }
-  settings: Config['globals']['site-settings']
+  page: Pick<Page, 'title' | 'meta' | 'breadcrumbs'>
+  settings: Config['globals']['preferences']
   slug: string
   siteURL: string
   isPreview: boolean
@@ -19,10 +19,10 @@ export function generatePageMetadata({
   isPreview,
 }: Props): Metadata {
   const siteTitle = settings.meta?.title || 'Your Website Name'
-  const title = page.title || siteTitle
+  const title = page.meta?.title || page.title || siteTitle
 
   const description = page.meta?.description || settings.meta?.description || undefined
-  const path = page.pathname || getPagePath(slug)
+  const path = page.breadcrumbs?.at(-1)?.url || getPagePath(slug)
   const metadata: Metadata = {
     metadataBase: new URL(siteURL),
     title,
@@ -59,7 +59,7 @@ export function generatePageMetadata({
     }
   }
 
-  if (isPreview) {
+  if (isPreview || path === '/404') {
     metadata.robots = { index: false, follow: false }
   }
 

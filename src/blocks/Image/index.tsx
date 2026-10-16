@@ -2,7 +2,7 @@ import NextImage from 'next/image'
 
 import type { ImageBlock as ImageBlockProps } from '@/payload-types'
 
-export function ImageBlock({ image, caption }: ImageBlockProps) {
+export function ImageBlock({ image }: ImageBlockProps) {
   if (!image || typeof image !== 'object' || !image.url) return null
 
   return (
@@ -14,7 +14,6 @@ export function ImageBlock({ image, caption }: ImageBlockProps) {
         width={image.width || 1200}
         height={image.height || 800}
       />
-      {caption && <figcaption>{caption}</figcaption>}
     </figure>
   )
 }

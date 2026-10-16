@@ -13,12 +13,13 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 import { versionedFilenames } from '@payloadflare/versioned-filenames'
 import { livePreviewPlugin } from '@payloadflare/live-preview'
+import { openLivePreviewByDefault } from './plugins/openLivePreviewByDefault'
+import { revalidateSiteOnChange } from './plugins/revalidateSiteOnChange'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
-import { SiteSettings } from './globals/SiteSettings'
-import { NotFoundPage } from './globals/NotFoundPage'
+import { Preferences } from './globals/Preferences'
 import { getPagePath } from './lib/pages/getPagePath'
 import { resolvePagePath } from './lib/pages/resolvePagePath'
 
@@ -80,13 +81,14 @@ export default buildConfig({
     },
   },
   collections: [Users, Media, Pages],
-  globals: [SiteSettings, NotFoundPage],
+  globals: [Preferences],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: sqliteD1Adapter({
     binding: cloudflare.env.D1,
+    blocksAsJSON: true,
     readReplicas: 'first-primary',
   }),
   logger: isProduction ? cloudflareLogger : undefined,
@@ -94,21 +96,19 @@ export default buildConfig({
     nestedDocsPlugin({
       collections: ['pages'],
       parentFieldSlug: 'parent',
-      generateLabel: (_, doc) => String(doc.title || doc.slug || ''),
       generateURL: (docs) => getPagePath(docs.map((doc) => String(doc.slug || '')).join('/')),
     }),
     seoPlugin({
       uploadsCollection: Media.slug,
       tabbedUI: true,
       generateURL: async ({ doc, req, globalSlug }) => {
-        if (globalSlug === SiteSettings.slug) return process.env.NEXT_PUBLIC_SERVER_URL!
+        if (globalSlug === Preferences.slug) return process.env.NEXT_PUBLIC_SERVER_URL!
         const pathname = await resolvePagePath(doc, req)
         return pathname ? new URL(pathname, process.env.NEXT_PUBLIC_SERVER_URL!).href : ''
       },
     }),
     livePreviewPlugin({
       collections: [Pages.slug],
-      globals: [NotFoundPage.slug],
     }),
     formBuilderPlugin({
       formOverrides: {
@@ -126,6 +126,8 @@ export default buildConfig({
       collections: { media: true },
     }),
     versionedFilenames({}),
+    openLivePreviewByDefault,
+    revalidateSiteOnChange,
   ],
   upload: {
     abortOnLimit: true,

@@ -9,7 +9,7 @@ import './globals.css'
 export async function generateMetadata(): Promise<Metadata> {
   const payload = await getPayload({ config })
   const { favicon } = await payload.findGlobal({
-    slug: 'site-settings',
+    slug: 'preferences',
     depth: 1,
     overrideAccess: false,
   })

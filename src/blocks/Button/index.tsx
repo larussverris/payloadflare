@@ -19,7 +19,7 @@ export function ButtonBlock({ label, type, page, url, file, phone, email, newTab
       href = getLinkURL(media?.url)
       break
     case 'page':
-      href = page && typeof page === 'object' ? getLinkURL(page.pathname) : null
+      href = page && typeof page === 'object' ? getLinkURL(page.breadcrumbs?.at(-1)?.url) : null
       break
     case 'url':
       href = getWebsiteURL(url)

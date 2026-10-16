@@ -11,7 +11,6 @@ export const Video: Block = {
       required: true,
       filterOptions: { mimeType: { contains: 'video/' } },
     },
-    { name: 'caption', type: 'text' },
     {
       name: 'captions',
       label: 'Closed captions',

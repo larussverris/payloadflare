@@ -1,30 +1,13 @@
-import config from '@payload-config'
-import { getPayload } from 'payload'
-
 import { BlocksRenderer } from '@/components/BlocksRenderer'
+import { findPublishedPageByPath } from '@/lib/pages/findPublishedPageByPath'
 
 export default async function NotFound() {
-  let blocks: Page['layout']
-  let title: string | undefined
+  let page: Awaited<ReturnType<typeof findPublishedPageByPath>> = undefined
   try {
-    const payload = await getPayload({ config })
-    const page = await payload.findGlobal({
-      slug: 'not-found-page',
-      draft: false,
-      overrideAccess: false,
-    })
-
-    blocks = page.layout
-    title = page.title
+    page = await findPublishedPageByPath('/404')
   } catch (error) {
     console.error('Unable to load the 404 page content.', error)
   }
 
-  return (
-    <>
-      {title && <title>{title}</title>}
-      <BlocksRenderer blocks={blocks} />
-    </>
-  )
+  return page ? <BlocksRenderer blocks={page.layout} /> : <h1>Page not found</h1>
 }
-import type { Page } from '@/payload-types'

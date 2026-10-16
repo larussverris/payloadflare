@@ -9,18 +9,13 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 
-import { revalidateSite } from '@/hooks/revalidateSite'
-
-export const SiteSettings: GlobalConfig = {
-  slug: 'site-settings',
+export const Preferences: GlobalConfig = {
+  slug: 'preferences',
   label: 'Preferences',
-  admin: { group: 'Website' },
   access: {
     read: () => true,
     update: ({ req }) => Boolean(req.user),
   },
-  versions: true,
-  hooks: { afterChange: [revalidateSite] },
   fields: [
     {
       type: 'tabs',

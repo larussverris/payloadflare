@@ -11,6 +11,5 @@ export const Image: Block = {
       required: true,
       filterOptions: { mimeType: { contains: 'image/' } },
     },
-    { name: 'caption', type: 'text' },
   ],
 }

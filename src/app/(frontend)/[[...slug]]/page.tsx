@@ -6,6 +6,7 @@ import { getPayload } from 'payload'
 import { BlocksRenderer } from '@/components/BlocksRenderer'
 import { generatePageMetadata } from '@/lib/seo/generatePageMetadata'
 import { getPagePath } from '@/lib/pages/getPagePath'
+import { getPagePathQuery } from '@/lib/pages/findPublishedPageByPath'
 
 type Props = { params: Promise<{ slug?: string[] }> }
 
@@ -15,11 +16,12 @@ export default async function Page({ params }: Props) {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: 'pages',
+    draft: isEnabled,
     limit: 1,
     pagination: false,
     overrideAccess: isEnabled,
     context: { livePreview: true },
-    where: { pathname: { equals: getPagePath(slug.join('/')) } },
+    where: getPagePathQuery(getPagePath(slug.join('/'))),
   })
   const page = docs[0]
   if (!page) notFound()
@@ -34,17 +36,18 @@ export async function generateMetadata({ params }: Props) {
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: 'pages',
+    draft: isEnabled,
     limit: 1,
     pagination: false,
     overrideAccess: isEnabled,
     context: { livePreview: true },
-    where: { pathname: { equals: getPagePath(pageSlug) } },
+    where: getPagePathQuery(getPagePath(pageSlug)),
   })
   const page = docs[0]
   if (!page) notFound()
 
   const settings = await payload.findGlobal({
-    slug: 'site-settings',
+    slug: 'preferences',
     depth: 1,
     overrideAccess: false,
   })
