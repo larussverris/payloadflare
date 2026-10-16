@@ -111,12 +111,6 @@ export default buildConfig({
       collections: [Pages.slug],
     }),
     formBuilderPlugin({
-      formOverrides: {
-        admin: { group: 'Administration' },
-      },
-      formSubmissionOverrides: {
-        admin: { group: 'Administration' },
-      },
       fields: {
         payment: false,
       },
