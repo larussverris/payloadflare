@@ -1,4 +1,3 @@
-import { slugField } from 'payload'
 import type { CollectionConfig } from 'payload'
 import {
   MetaDescriptionField,
@@ -7,92 +6,144 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { createParentField } from '@payloadcms/plugin-nested-docs'
 import { resolvePagePath } from '@/lib/pages/resolvePagePath'
+import { assertPagePathAvailable } from '@/lib/pages/assertPagePathAvailable'
 
 import { Hero } from '../blocks/Hero/config'
 import { Image } from '../blocks/Image/config'
-import { NotFound } from '../blocks/NotFound/config'
 import { Text } from '../blocks/Text/config'
 import { Video } from '../blocks/Video/config'
-import {
-  canChangePageBlocks,
-  canChangePagePath,
-  canCreatePage,
-  canDeletePage,
-  canReadPage,
-  canUpdatePage,
-} from './Pages/access'
 import { validatePageChanges } from './Pages/hooks/validatePageChanges'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  orderable: true,
+  labels: { singular: 'Page', plural: 'Pages' },
+  authorship: false,
+  versions: { drafts: { autosave: { interval: 200 } } },
   admin: {
+    group: false,
     components: {
+      beforeList: ['/components/admin/PagesListPreferences#PagesListPreferences'],
       edit: {
-        beforeDocumentControls: ['/components/admin/CollapsePageNav#CollapsePageNav'],
-        editMenuItems: ['/components/admin/PageDetailsMenuItems#PageDetailsMenuItems'],
+        beforeDocumentControls: ['/components/admin/PageHeadingSettings#PageHeadingSettings'],
       },
     },
     useAsTitle: 'title',
-    defaultColumns: ['title', 'slug', '_status'],
+    defaultColumns: ['title', 'path', '_status', 'updatedAt'],
     listSearchableFields: ['title', 'slug'],
-    preview: async (data, { req }) => {
-      const pathname = await resolvePagePath(data, req)
-      return pathname ? `/api/preview?${new URLSearchParams({ path: pathname })}` : null
-    },
     livePreview: {
-      url: ({ data, req }) => resolvePagePath(data, req),
+      openByDefault: true,
+      url: async ({ data, req }) => {
+        const path = await resolvePagePath(data, req)
+        return path ? `/api/preview?${new URLSearchParams({ path })}` : null
+      },
     },
   },
   access: {
-    create: canCreatePage,
-    read: canReadPage,
-    update: canUpdatePage,
-    delete: canDeletePage,
+    read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
   },
   hooks: {
     beforeChange: [validatePageChanges],
   },
   fields: [
     {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
-    {
       name: 'layout',
       type: 'blocks',
-      access: { update: canChangePageBlocks },
-      blocks: [Hero, Text, Image, Video, NotFound],
+      admin: {
+        initCollapsed: true,
+        components: { Field: '/components/admin/PageSettingsDrawer#PageLayoutField' },
+      },
+      blocks: [Hero, Text, Image, Video],
     },
     {
-      name: 'meta',
       type: 'group',
-      label: 'SEO',
-      admin: { components: { Field: '/components/admin/PageDetailsDrawer#PageSEODrawer' } },
+      label: 'Page settings',
+      admin: {
+        components: { Field: '/components/admin/PageSettingsDrawer#PageSettingsDrawer' },
+      },
       fields: [
-        OverviewField({ titlePath: 'meta.title' }),
-        MetaTitleField({ hasGenerateFn: false }),
-        MetaDescriptionField({ hasGenerateFn: false }),
-        MetaImageField({ relationTo: 'media', hasGenerateFn: false }),
-        PreviewField({ hasGenerateFn: true, titlePath: 'meta.title' }),
-      ],
-    },
-    {
-      type: 'collapsible',
-      label: 'Settings',
-      admin: { components: { Field: '/components/admin/PageDetailsDrawer#PageSettingsDrawer' } },
-      fields: [
-        slugField({ position: 'main' }),
-        createParentField('pages', {
-          label: 'Parent page',
-          access: { update: canChangePagePath },
+        {
+          name: 'title',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'isHome',
+          type: 'checkbox',
+          label: 'Homepage',
+          defaultValue: false,
+          index: true,
           admin: {
-            condition: (data) => data.slug !== 'home' && data.slug !== '404',
-            description: 'Leave empty for a top-level page.',
+            description: 'Serve this page at /. Replaces the current homepage when saved.',
+            components: { Field: '/components/admin/PageHomepageField#PageHomepageField' },
           },
-        }),
+        },
+        {
+          name: 'folder',
+          type: 'relationship',
+          relationTo: 'folders',
+          hasMany: false,
+          index: true,
+          localized: false,
+          label: 'Parent folder',
+          admin: {
+            // The homepage is served at / regardless of its stored parent folder.
+            condition: (data) => data.isHome !== true,
+          },
+        },
+        {
+          name: 'slug',
+          type: 'slug',
+          useAsSlug: 'title',
+          validate: (value: unknown) =>
+            (typeof value === 'string' && /^[a-zA-Z0-9-]+$/.test(value)) ||
+            'Use only letters, numbers, and dashes.',
+          hooks: {
+            beforeChange: [
+              async ({ data, originalDoc, req, value }) => {
+                // Payload generates the slug before this hook, including for a new draft.
+                if (data) {
+                  const page = { ...originalDoc, ...data, slug: value }
+                  assertPagePathAvailable(await resolvePagePath(page, req))
+                }
+                return value
+              },
+            ],
+          },
+          admin: {
+            position: 'main',
+            // The homepage is served at /; keep its slug for when it becomes a regular page.
+            condition: (data) => data.isHome !== true,
+          },
+        },
+        {
+          name: 'pageURLPreview',
+          type: 'ui',
+          admin: {
+            components: { Field: '/components/admin/PageURLPreview#PageURLPreview' },
+          },
+        },
+        {
+          name: 'meta',
+          type: 'group',
+          label: 'SEO',
+          fields: [
+            OverviewField({
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+              imagePath: 'meta.image',
+            }),
+            MetaTitleField({ hasGenerateFn: false }),
+            MetaDescriptionField({ hasGenerateFn: false }),
+            MetaImageField({ relationTo: 'media', hasGenerateFn: false }),
+            PreviewField({
+              hasGenerateFn: true,
+              titlePath: 'meta.title',
+              descriptionPath: 'meta.description',
+            }),
+          ],
+        },
       ],
     },
   ],

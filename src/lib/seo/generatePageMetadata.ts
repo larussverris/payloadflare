@@ -1,28 +1,19 @@
 import type { Metadata } from 'next'
 
 import type { Config, Page } from '@/payload-types'
-import { getPagePath } from '@/lib/pages/getPagePath'
 
 type Props = {
-  page: Pick<Page, 'title' | 'meta' | 'breadcrumbs'>
+  page: Pick<Page, 'title' | 'meta'>
   settings: Config['globals']['preferences']
-  slug: string
+  path: string
   siteURL: string
-  isPreview: boolean
 }
 
-export function generatePageMetadata({
-  page,
-  settings,
-  slug,
-  siteURL,
-  isPreview,
-}: Props): Metadata {
+export function generatePageMetadata({ page, settings, path, siteURL }: Props): Metadata {
   const siteTitle = settings.meta?.title || 'Your Website Name'
   const title = page.meta?.title || page.title || siteTitle
 
   const description = page.meta?.description || settings.meta?.description || undefined
-  const path = page.breadcrumbs?.at(-1)?.url || getPagePath(slug)
   const metadata: Metadata = {
     metadataBase: new URL(siteURL),
     title,
@@ -57,10 +48,6 @@ export function generatePageMetadata({
       card: 'summary_large_image',
       images: [sharingImage],
     }
-  }
-
-  if (isPreview || path === '/404') {
-    metadata.robots = { index: false, follow: false }
   }
 
   return metadata

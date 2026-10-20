@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
+import { findDistinct, upsert } from '@payloadcms/drizzle'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -9,18 +10,18 @@ import { GetPlatformProxyOptions } from 'wrangler'
 import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
-import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 import { versionedFilenames } from '@payloadflare/versioned-filenames'
-import { livePreviewPlugin } from '@payloadflare/live-preview'
-import { openLivePreviewByDefault } from './plugins/openLivePreviewByDefault'
+import { previewEndpoint } from './endpoints/preview'
 import { revalidateSiteOnChange } from './plugins/revalidateSiteOnChange'
+import { pagePaths } from './plugins/pagePaths'
 
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
+import { Folders } from './collections/Folders'
 import { Preferences } from './globals/Preferences'
-import { getPagePath } from './lib/pages/getPagePath'
+import { NotFoundPage } from './globals/NotFoundPage'
 import { resolvePagePath } from './lib/pages/resolvePagePath'
 
 if (!process.env.NEXT_PUBLIC_SERVER_URL) {
@@ -69,6 +70,20 @@ const cloudflare =
 
 export default buildConfig({
   admin: {
+    components: {
+      sidebar: {
+        tabs: [
+          {
+            slug: 'site-pages',
+            label: 'Pages',
+            components: {
+              Icon: '@payloadcms/ui#DocumentIcon',
+              Content: '/components/admin/PagesSidebarTab#PagesSidebarTab',
+            },
+          },
+        ],
+      },
+    },
     // https://payloadcms.com/docs/authentication/overview
     autoLogin:
       process.env.NODE_ENV === 'development' && process.env.DEV_AUTO_LOGIN_EMAIL
@@ -80,48 +95,58 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Pages],
-  globals: [Preferences],
+  endpoints: [previewEndpoint],
+  collections: [Users, Media, Folders, Pages],
+  globals: [Preferences, NotFoundPage],
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteD1Adapter({
+  db: sqliteD1AdapterWithFixes({
     binding: cloudflare.env.D1,
     blocksAsJSON: true,
     readReplicas: 'first-primary',
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
-    nestedDocsPlugin({
-      collections: ['pages'],
-      parentFieldSlug: 'parent',
-      generateURL: (docs) => getPagePath(docs),
-    }),
+    pagePaths({ collection: Pages.slug }),
     seoPlugin({
       uploadsCollection: Media.slug,
-      tabbedUI: true,
       collections: [],
       generateURL: async ({ doc, req, globalSlug }) => {
         const pathname = globalSlug ? '/' : await resolvePagePath(doc, req)
         return pathname ? new URL(pathname, process.env.NEXT_PUBLIC_SERVER_URL!).href : ''
       },
     }),
-    livePreviewPlugin({
-      collections: [Pages.slug],
-    }),
     formBuilderPlugin({
+      formOverrides: {
+        labels: { singular: 'Form', plural: 'Forms' },
+        authorship: false,
+      },
+      formSubmissionOverrides: {
+        authorship: false,
+        access: {
+          create: ({ req }) => !req.user,
+          read: ({ req }) => Boolean(req.user),
+          update: () => false,
+          delete: () => false,
+        },
+      },
       fields: {
         payment: false,
       },
     }),
+    versionedFilenames(),
+    revalidateSiteOnChange({
+      collections: [Pages.slug, Folders.slug, Media.slug],
+      globals: [Preferences.slug, NotFoundPage.slug],
+    }),
+  ],
+  storage: [
     r2Storage({
       bucket: cloudflare.env.R2,
       collections: { media: true },
     }),
-    versionedFilenames({}),
-    openLivePreviewByDefault,
-    revalidateSiteOnChange,
   ],
   upload: {
     abortOnLimit: true,
@@ -150,4 +175,21 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
         remoteBindings: isProduction,
       } satisfies GetPlatformProxyOptions),
   )
+}
+
+function sqliteD1AdapterWithFixes(args: Parameters<typeof sqliteD1Adapter>[0]) {
+  const adapterConfig = sqliteD1Adapter(args)
+  const originalInit = adapterConfig.init
+
+  return {
+    ...adapterConfig,
+    init: (initArgs: Parameters<typeof originalInit>[0]) => {
+      const adapter = originalInit(initArgs)
+      // Payload 4 beta omits this method from the D1 adapter, though its list view uses it.
+      adapter.findDistinct = findDistinct
+      // The beta wires upsert to updateOne without enabling insertion of missing preferences.
+      adapter.upsert = upsert
+      return adapter
+    },
+  }
 }

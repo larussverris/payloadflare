@@ -1,12 +1,7 @@
-import { getPayload } from 'payload'
-import config from '@payload-config'
+import { getPreferences } from '@/lib/getPreferences'
 
 export async function GET() {
-  const payload = await getPayload({ config })
-  const { enableLlmsText, llmsText } = await payload.findGlobal({
-    slug: 'preferences',
-    depth: 0,
-  })
+  const { enableLlmsText, llmsText } = await getPreferences()
 
   if (!enableLlmsText) {
     return new Response(null, {

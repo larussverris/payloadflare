@@ -11,6 +11,7 @@ import {
 
 export const Preferences: GlobalConfig = {
   slug: 'preferences',
+  authorship: false,
   label: 'Preferences',
   access: {
     read: () => true,
@@ -20,6 +21,25 @@ export const Preferences: GlobalConfig = {
     {
       type: 'tabs',
       tabs: [
+        {
+          label: 'General',
+          fields: [
+            {
+              name: 'pageLanguage',
+              label: 'Page language',
+              type: 'select',
+              required: true,
+              defaultValue: 'en',
+              options: [
+                { label: 'English', value: 'en' },
+                { label: 'Icelandic (Íslenska)', value: 'is' },
+              ],
+              admin: {
+                description: 'The language used for all public pages on your website.',
+              },
+            },
+          ],
+        },
         {
           label: 'Search & sharing',
           fields: [

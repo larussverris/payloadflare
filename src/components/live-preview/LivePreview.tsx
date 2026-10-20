@@ -3,7 +3,7 @@ import 'server-only'
 import { draftMode } from 'next/headers'
 import type { ReactNode } from 'react'
 
-import { exitPreviewAction } from '../server/exitPreviewAction'
+import { exitPreviewAction } from '@/actions/exitPreview'
 import { LivePreviewShell } from './LivePreviewShell'
 
 type LivePreviewProps = {

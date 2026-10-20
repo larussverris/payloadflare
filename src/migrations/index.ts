@@ -3,6 +3,7 @@ import * as migration_20260811_104401_add_form_builder from './20260811_104401_a
 import * as migration_20261016_171341_pages_schema from './20261016_171341_pages_schema'
 import * as migration_20261016_171342_create_home_page from './20261016_171342_create_home_page'
 import * as migration_20261016_171343_create_404_page from './20261016_171343_create_404_page'
+import * as migration_20261019_234056_current_schema from './20261019_234056_current_schema'
 
 export const migrations = [
   {
@@ -29,5 +30,10 @@ export const migrations = [
     up: migration_20261016_171343_create_404_page.up,
     down: migration_20261016_171343_create_404_page.down,
     name: '20261016_171343_create_404_page',
+  },
+  {
+    up: migration_20261019_234056_current_schema.up,
+    down: migration_20261019_234056_current_schema.down,
+    name: '20261019_234056_current_schema',
   },
 ]

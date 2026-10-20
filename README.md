@@ -153,15 +153,18 @@ in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend re
 in `index.tsx`. Use named component exports and import implementations from the
 block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
 
-Pages uses the existing [live preview plugin](packages/live-preview/README.md).
+Live preview is implemented in `src/components/live-preview`, with an authenticated
+`/api/preview` endpoint and explicit draft/autosave settings on Pages and the 404 global.
 Open Live Preview from the editor to render drafts and refresh after autosaves.
 Preview reads stay within the current request; public reads and the sitemap include
 only published pages. Set `NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
 
 ## Page SEO
 
-Pages includes a **Content** tab and an **SEO** tab supplied by Payload's SEO plugin.
-The SEO tab stores each page's title, description, and sharing image in `meta`;
+Published pages are included in the sitemap. Not-found responses remain `noindex`.
+
+Pages renders layout blocks in the main editor and SEO fields in its settings drawer.
+Payload's SEO plugin stores each page's title, description, and sharing image in `meta`;
 images come from the existing Media collection. The plugin shares the Payload
 version pinned in the workspace catalog.
 
@@ -173,6 +176,7 @@ back to their page title. Preview responses include a noindex directive.
 ## Optimizations
 
 - **CMS metadata** serves the sitemap from published pages and `llms.txt` from Site Settings.
+- **Published content caching** reuses published pages, site settings, 404 content, and the sitemap for an hour. CMS changes invalidate the shared `site` tag immediately, including unpublishing; draft page previews bypass the cache.
 - **Persistent Next.js cache** stores SSG, ISR, and data-cache entries in R2.
 - **Regional cache** keeps frequently read cache entries close to the Worker for up to one minute.
 - **D1 read replicas** use Payload's `first-primary` strategy for consistent reads with lower latency after the initial primary query.
@@ -203,3 +207,11 @@ These files are cached by browsers for 30 days. Versioned filenames such as `log
 Other files placed directly in `public/` use Cloudflare's normal static-asset caching unless another rule is added to `public/_headers`.
 
 Uploads are limited to 6 MiB. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
+
+Page folders have no fixed nesting limit. A folder cannot be moved into itself or
+one of its descendants. Page URLs are calculated
+from the current folder hierarchy and page slug, rather than stored in the database.
+To serve a page at a folder's URL, create a page beside the folder with the same slug.
+For example, a root page `about` serves `/about`, while pages inside the `about`
+folder serve `/about/team` and other nested URLs.
+Folder moves and renames update URLs without rewriting pages or historical versions.

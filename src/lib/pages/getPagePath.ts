@@ -1,9 +1,23 @@
-// Document paths omit Home's internal slug; URL paths retain every segment.
-export function getPagePath(source: string | { slug?: unknown }[]): string {
-  const segments =
-    typeof source === 'string'
-      ? source.split('/').filter(Boolean)
-      : source.map((doc) => String(doc.slug || '')).filter((slug) => slug && slug !== 'home')
+import type { Folder } from '@/payload-types'
 
-  return `/${segments.map(encodeURIComponent).join('/')}`
+/** Read parents one at a time so paths are independent of relationship population depth. */
+export async function getFolderSegments(
+  folderID: number | string | null | undefined,
+  loadFolder: (id: number | string) => Promise<Folder>,
+  visited = new Set<string>(),
+): Promise<string[]> {
+  const segments: string[] = []
+  while (folderID != null) {
+    const key = String(folderID)
+    if (visited.has(key)) throw new Error('A folder cannot contain itself or its descendants.')
+    visited.add(key)
+    const folder = await loadFolder(folderID)
+    segments.unshift(folder.slug)
+    folderID = typeof folder.parent === 'object' ? folder.parent?.id : folder.parent
+  }
+  return segments
+}
+
+export function getPagePathFromFolder(slug: string, folderSegments: string[]): string {
+  return `/${[...folderSegments, slug].join('/')}`
 }
