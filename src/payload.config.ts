@@ -158,8 +158,8 @@ export default buildConfig({
   // https://payloadcms.com/docs/rich-text/overview
   editor: lexicalEditor({}),
   email: cloudflareEmailAdapter({
-    defaultFromAddress: 'noreply@yourdomain.com',
-    defaultFromName: 'Payload CMS',
+    defaultFromAddress: process.env.EMAIL_FROM_ADDRESS!,
+    defaultFromName: process.env.EMAIL_FROM_NAME!,
     // `SendEmail` is supplied by Wrangler's generated runtime types. The
     // binding is cast while the generated environment file is being updated.
     binding: cloudflare.env.EMAIL,

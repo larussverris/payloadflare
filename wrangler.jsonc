@@ -62,7 +62,7 @@
     {
       // Onboard the sender domain with `pnpm wrangler email sending enable yourdomain.com`.
       "name": "EMAIL",
-      // Keep this address in sync with `defaultFromAddress` in `src/payload.config.ts`.
+      // Keep this address in sync with EMAIL_FROM_ADDRESS.
       "allowed_sender_addresses": ["noreply@yourdomain.com"],
     },
   ],
