@@ -147,7 +147,7 @@ Add Image and Video blocks to a page's layout. Image selects an image from Media
 and supports an optional caption.
 Video selects an uploaded video and supports a caption and WebVTT
 closed captions with a language code. Videos render with playback controls and
-do not autoplay. All uploads use the template's existing 6 MiB size limit.
+do not autoplay. All uploads use the `MAX_UPLOAD_SIZE` limit.
 Each block lives
 in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend renderer
 in `index.tsx`. Use named component exports and import implementations from the
@@ -206,7 +206,8 @@ These files are cached by browsers for 30 days. Versioned filenames such as `log
 
 Other files placed directly in `public/` use Cloudflare's normal static-asset caching unless another rule is added to `public/_headers`.
 
-Uploads are limited to 6 MiB. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
+Set the required `MAX_UPLOAD_SIZE` environment variable in bytes (for example,
+`6291456` for 6 MiB). There is no fallback value. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
 
 Page folders have no fixed nesting limit. A folder cannot be moved into itself or
 one of its descendants. Page URLs are calculated

@@ -151,8 +151,7 @@ export default buildConfig({
   upload: {
     abortOnLimit: true,
     limits: {
-      // Cap uploads to 6 MB.
-      fileSize: 6 * 1024 * 1024,
+      fileSize: Number(process.env.MAX_UPLOAD_SIZE),
     },
   },
   // https://payloadcms.com/docs/rich-text/overview
