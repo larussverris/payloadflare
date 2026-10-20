@@ -7,6 +7,8 @@ OpenNext, Cloudflare D1, and R2.
 
 - Use `pnpm` exclusively. Do not introduce Yarn or npm lockfiles.
 - Keep application source in `src/`; root-level files are project configuration.
+- Keep Payload global configs in `src/globals/`, alongside `src/collections/`
+  and `src/fields/`.
 - Place `generateMetadata` below the page or layout component in the same file.
 - Keep each block in `src/blocks/<BlockName>/`, with its Payload schema in
   `config.ts` and rendered implementation in `index.tsx`. Use named component
