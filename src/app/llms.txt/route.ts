@@ -1,4 +1,4 @@
-import { getPreferences } from '@/lib/getPreferences'
+import { getPreferences } from '@/utilities/getPreferences'
 
 export async function GET() {
   const { enableLlmsText, llmsText } = await getPreferences()

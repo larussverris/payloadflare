@@ -10,7 +10,7 @@ It includes authenticated admin users, public media uploads, a form builder, and
 
 ## Run locally
 
-Requirements: Node.js 24.15.0 or later, pnpm, and a Cloudflare account.
+Requirements: Node.js 24.22.1 or later, pnpm, and a Cloudflare account.
 
 ```bash
 pnpm install
@@ -112,11 +112,14 @@ On a cache miss, Payload retrieves the image from R2. On a hit, Cloudflare serve
 
 After deploying, request the same uploaded image twice using `curl -sS -D - -o /dev/null https://yourdomain.com/api/media/file/example.jpg` and check for `CF-Cache-Status: HIT` on a repeated request. Also verify `/admin` and `/api/media` do not produce cache hits. Edge behavior must be verified on Cloudflare, not just with `pnpm dev`.
 
-The [`@payloadflare/versioned-filenames`](packages/versioned-filenames/README.md) plugin is enabled for `media` in `src/payload.config.ts`. New uploads and file replacements automatically receive a 32-character hexadecimal filename (a UUID without hyphens), preserving the extension, so browsers fetch a new URL. Metadata-only edits keep the existing filename; existing uploads are not renamed until replaced. Purge its Workers Cache entry if the old URL should stop being served from the edge. Purging cannot remove a copy already cached in a browser, and a TTL does not guarantee an object remains in edge cache until it expires.
+Media keeps Payload's normal upload filenames. The `mediaURLVersions` plugin in `src/plugins/mediaURLVersions.ts` is configured for Media in Payload config. It attaches an `afterRead` hook that appends `?v=<updatedAt timestamp>` to file, thumbnail, and image-size URLs. Replacing a file or editing metadata changes the URL version, allowing browsers and Cloudflare to fetch fresh content. Consumers should use the returned `url` rather than reconstructing a URL from `filename`, and selected media reads must include `updatedAt` to receive versioning. Cache keys must include the `v` query parameter. Existing randomly named R2 objects are not renamed; their URLs also receive versions. The legacy `displayFilename` field has been removed; existing installations should generate their own cleanup migration. The filename-randomization plugin is no longer enabled.
+
+Verify a same-name file replacement in the admin and on the deployed site: the returned URL's `v` value should change and the new URL should serve the replacement bytes. Old URLs can continue serving cached content until expiry; query versions are cache keys, not archived file versions. Purging cannot remove copies already cached in browsers.
 
 ### Deploy schema and application changes
 
-Before deploying schema changes, create a Payload migration:
+This template ships without migration history. Generate an initial migration before your first deployment, then generate migrations for subsequent schema changes. Commit the generated migration files and index to your project repository:
+
 
 ```bash
 pnpm payload migrate:create
@@ -130,10 +133,9 @@ pnpm deploy
 
 ## Pages and live preview
 
-The setup migration creates a protected **Home** document in Pages at `/`.
-Edit, publish, and unpublish it like any other page. Its slug is read-only, and it
-cannot have a parent or be deleted. Draft edits remain available; duplicating Home
-creates a regular page with a new slug.
+Create a page and use its page settings to make it the homepage at `/`.
+The homepage has no parent; selecting another page as homepage replaces the current
+one. The template does not seed a homepage through migrations.
 
 Create other pages with a single slug segment, such as `team`, and optionally
 choose a parent to produce a URL such as `/about/team`. One optional catch-all
@@ -154,7 +156,10 @@ in `index.tsx`. Use named component exports and import implementations from the
 block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
 
 Live preview is implemented in `src/components/live-preview`, with an authenticated
-`/api/preview` endpoint and explicit draft/autosave settings on Pages and the 404 global.
+`/api/preview` Next.js Route Handler and explicit draft/autosave settings on Pages and the 404 global.
+The handler authenticates the Payload session, enables Next.js Draft Mode, and redirects
+to a same-origin preview path. Preview entry uses GET because the CMS opens a URL;
+exiting preview uses the Server Action in `src/actions/exitPreview.ts`.
 Open Live Preview from the editor to render drafts and refresh after autosaves.
 Preview reads stay within the current request; public reads and the sitemap include
 only published pages. Set `NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
@@ -209,10 +214,11 @@ Other files placed directly in `public/` use Cloudflare's normal static-asset ca
 Set the required `MAX_UPLOAD_SIZE` environment variable in bytes (for example,
 `6291456` for 6 MiB). There is no fallback value. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.
 
-Page folders have no fixed nesting limit. A folder cannot be moved into itself or
-one of its descendants. Page URLs are calculated
-from the current folder hierarchy and page slug, rather than stored in the database.
-To serve a page at a folder's URL, create a page beside the folder with the same slug.
-For example, a root page `about` serves `/about`, while pages inside the `about`
-folder serve `/about/team` and other nested URLs.
-Folder moves and renames update URLs without rewriting pages or historical versions.
+Pages nest under other pages using Payload's native hierarchy and parent selector.
+Each parent is a real page: `about` serves `/about`, and its child `team` serves
+`/about/team`. Payload computes `_h_slugPath` on read; moving or renaming a parent
+updates descendant URLs without rewriting those pages. The page marked as the
+homepage serves `/`.
+
+The separate folder model is no longer used. Existing folder records and page-folder
+assignments are not converted; no data migration is included.

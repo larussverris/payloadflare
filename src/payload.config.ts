@@ -11,18 +11,11 @@ import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
-import { versionedFilenames } from '@payloadflare/versioned-filenames'
-import { previewEndpoint } from './endpoints/preview'
-import { revalidateSiteOnChange } from './plugins/revalidateSiteOnChange'
-import { pagePaths } from './plugins/pagePaths'
-
-import { Users } from './collections/Users'
-import { Media } from './collections/Media'
-import { Pages } from './collections/Pages'
-import { Folders } from './collections/Folders'
-import { Preferences } from './globals/Preferences'
-import { NotFoundPage } from './globals/NotFoundPage'
-import { resolvePagePath } from './lib/pages/resolvePagePath'
+import { revalidateSiteOnSave } from './plugins/revalidateSiteOnSave'
+import { mediaURLVersions } from './plugins/mediaURLVersions'
+import * as blockSchemas from '@/blocks/config'
+import * as collections from '@/collections'
+import * as globals from '@/globals'
 
 if (!process.env.NEXT_PUBLIC_SERVER_URL) {
   throw new Error('NEXT_PUBLIC_SERVER_URL must be set.')
@@ -69,6 +62,7 @@ const cloudflare =
     : await getCloudflareContext({ async: true })
 
 export default buildConfig({
+  serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
   admin: {
     components: {
       sidebar: {
@@ -78,7 +72,7 @@ export default buildConfig({
             label: 'Pages',
             components: {
               Icon: '@payloadcms/ui#DocumentIcon',
-              Content: '/components/admin/PagesSidebarTab#PagesSidebarTab',
+              Content: '/admin/components/PagesSidebarTab#PagesSidebarTab',
             },
           },
         ],
@@ -90,14 +84,15 @@ export default buildConfig({
         ? { email: process.env.DEV_AUTO_LOGIN_EMAIL }
         : false,
     autoRefresh: true,
-    user: Users.slug,
+    user: collections.Users.slug,
     importMap: {
       baseDir: path.resolve(dirname),
     },
   },
-  endpoints: [previewEndpoint],
-  collections: [Users, Media, Folders, Pages],
-  globals: [Preferences, NotFoundPage],
+  // Payload mutates schemas during initialization; keep module exports clean for hot reload.
+  collections: Object.values(collections),
+  globals: Object.values(globals),
+  blocks: Object.values(blockSchemas),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -109,22 +104,18 @@ export default buildConfig({
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
-    pagePaths({ collection: Pages.slug }),
+    mediaURLVersions({ collections: [collections.Media.slug] }),
     seoPlugin({
-      uploadsCollection: Media.slug,
-      collections: [],
-      generateURL: async ({ doc, req, globalSlug }) => {
-        const pathname = globalSlug ? '/' : await resolvePagePath(doc, req)
-        return pathname ? new URL(pathname, process.env.NEXT_PUBLIC_SERVER_URL!).href : ''
+      uploadsCollection: collections.Media.slug,
+      collections: [], // Pages declares its SEO fields directly.
+      generateURL: ({ doc }) => {
+        if (doc.isHome) return '/'
+        if (doc._h_slugPath) return `/${doc._h_slugPath}`
+        return ''
       },
     }),
     formBuilderPlugin({
-      formOverrides: {
-        labels: { singular: 'Form', plural: 'Forms' },
-        authorship: false,
-      },
       formSubmissionOverrides: {
-        authorship: false,
         access: {
           create: ({ req }) => !req.user,
           read: ({ req }) => Boolean(req.user),
@@ -136,10 +127,9 @@ export default buildConfig({
         payment: false,
       },
     }),
-    versionedFilenames(),
-    revalidateSiteOnChange({
-      collections: [Pages.slug, Folders.slug, Media.slug],
-      globals: [Preferences.slug, NotFoundPage.slug],
+    revalidateSiteOnSave({
+      collections: Object.values(collections).map(({ slug }) => slug),
+      globals: Object.values(globals).map(({ slug }) => slug),
     }),
   ],
   storage: [

@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import * as blocks from '@/blocks/config'
 import {
   MetaDescriptionField,
   MetaImageField,
@@ -6,123 +7,166 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
-import { resolvePagePath } from '@/lib/pages/resolvePagePath'
-import { assertPagePathAvailable } from '@/lib/pages/assertPagePathAvailable'
-
-import { Hero } from '../blocks/Hero/config'
-import { Image } from '../blocks/Image/config'
-import { Text } from '../blocks/Text/config'
-import { Video } from '../blocks/Video/config'
-import { validatePageChanges } from './Pages/hooks/validatePageChanges'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
   orderable: true,
-  labels: { singular: 'Page', plural: 'Pages' },
-  authorship: false,
+  hierarchy: {
+    parentFieldName: 'parent',
+    slugField: 'slug',
+    allowHasMany: false,
+    admin: {
+      injectSidebarTab: false,
+      useHeaderButton: false,
+      components: { Icon: '@payloadcms/ui#DocumentIcon' },
+    },
+  },
   versions: { drafts: { autosave: { interval: 200 } } },
   admin: {
-    group: false,
-    components: {
-      beforeList: ['/components/admin/PagesListPreferences#PagesListPreferences'],
-      edit: {
-        beforeDocumentControls: ['/components/admin/PageHeadingSettings#PageHeadingSettings'],
-      },
-    },
-    useAsTitle: 'title',
-    defaultColumns: ['title', 'path', '_status', 'updatedAt'],
-    listSearchableFields: ['title', 'slug'],
     livePreview: {
       openByDefault: true,
       url: async ({ data, req }) => {
-        const path = await resolvePagePath(data, req)
-        return path ? `/api/preview?${new URLSearchParams({ path })}` : null
+        if (!data.id) return null
+        const page = await req.payload.findByID({
+          collection: 'pages',
+          id: data.id,
+          draft: true,
+          depth: 0,
+          select: { _h_slugPath: true, isHome: true },
+          req,
+        })
+        const pathname = page.isHome ? '/' : page._h_slugPath ? `/${page._h_slugPath}` : null
+        return pathname ? `/api/preview?${new URLSearchParams({ path: pathname })}` : null
       },
     },
+    group: false,
+    components: {
+      beforeList: ['/admin/components/PagesListPreferences#PagesListPreferences'],
+      edit: {
+        beforeDocumentControls: ['/admin/components/PageHeadingSettings#PageHeadingSettings'],
+      },
+    },
+    useAsTitle: 'title',
+    defaultColumns: ['title', '_h_slugPath', '_status', 'updatedAt'],
+    listSearchableFields: ['title', 'slug'],
   },
   access: {
     read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
   },
   hooks: {
-    beforeChange: [validatePageChanges],
+    beforeOperation: [({ args, operation, context }) => {
+      if (operation === 'read') {
+        const select = 'select' in args ? args.select as Record<string, unknown> | undefined : undefined
+        if (!select) context.computeHierarchyPaths = true
+        // Beta 4 does not auto-select native slug fields when computing hierarchy paths.
+        if (select?._h_slugPath === true || select?._h_titlePath === true) select.slug = true
+      }
+      return args
+    }],
+    beforeChange: [async ({ data, originalDoc, req }) => {
+      if ((data.isHome ?? originalDoc?.isHome) === true) data.parent = null
+      if (data.isHome === true) {
+        // Use the same request so nested writes share the current transaction.
+        await req.payload.update({
+          collection: 'pages',
+          where: {
+            and: [
+              { isHome: { equals: true } },
+              ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : []),
+            ],
+          },
+          data: { isHome: false },
+          overrideAccess: true,
+          req,
+        })
+      }
+      return data
+    }],
   },
   fields: [
+    {
+      name: 'parent',
+      type: 'relationship',
+      relationTo: 'pages',
+      hasMany: false,
+      index: true,
+      label: 'Parent page',
+      admin: {
+        components: { Field: '/admin/components/PageSettingsDrawer#PageParentField' },
+        condition: data => data.isHome !== true,
+      },
+      filterOptions: ({ id }) => id ? { id: { not_equals: id } } : true,
+    },
     {
       name: 'layout',
       type: 'blocks',
       admin: {
         initCollapsed: true,
-        components: { Field: '/components/admin/PageSettingsDrawer#PageLayoutField' },
+        components: { Field: '/admin/components/PageSettingsDrawer#PageLayoutField' },
       },
-      blocks: [Hero, Text, Image, Video],
+      blocks: Object.values(blocks),
     },
     {
-      type: 'group',
-      label: 'Page settings',
+      type: 'row',
       admin: {
-        components: { Field: '/components/admin/PageSettingsDrawer#PageSettingsDrawer' },
+        components: { Field: '/admin/components/PageSettingsDrawer#PageSettingsDrawer' },
       },
       fields: [
         {
-          name: 'title',
-          type: 'text',
-          required: true,
-        },
-        {
-          name: 'isHome',
-          type: 'checkbox',
-          label: 'Homepage',
-          defaultValue: false,
-          index: true,
-          admin: {
-            description: 'Serve this page at /. Replaces the current homepage when saved.',
-            components: { Field: '/components/admin/PageHomepageField#PageHomepageField' },
-          },
-        },
-        {
-          name: 'folder',
-          type: 'relationship',
-          relationTo: 'folders',
-          hasMany: false,
-          index: true,
-          localized: false,
-          label: 'Parent folder',
-          admin: {
-            // The homepage is served at / regardless of its stored parent folder.
-            condition: (data) => data.isHome !== true,
-          },
-        },
-        {
-          name: 'slug',
-          type: 'slug',
-          useAsSlug: 'title',
-          validate: (value: unknown) =>
-            (typeof value === 'string' && /^[a-zA-Z0-9-]+$/.test(value)) ||
-            'Use only letters, numbers, and dashes.',
-          hooks: {
-            beforeChange: [
-              async ({ data, originalDoc, req, value }) => {
-                // Payload generates the slug before this hook, including for a new draft.
-                if (data) {
-                  const page = { ...originalDoc, ...data, slug: value }
-                  assertPagePathAvailable(await resolvePagePath(page, req))
-                }
-                return value
+          type: 'group',
+          label: false,
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              label: 'Page name',
+              defaultValue: () => 'Untitled',
+              required: true,
+            },
+            {
+              name: 'slug',
+              type: 'slug',
+              useAsSlug: 'title',
+              admin: { position: 'main', condition: (data) => data.isHome !== true },
+            },
+            {
+              name: 'pageURLPreview',
+              type: 'ui',
+              admin: {
+                components: {
+                  Field: {
+                    path: '/admin/components/PathPreview#PathPreview',
+                    clientProps: { pathField: '_h_slugPath' },
+                  },
+                },
+                condition: (data) => data.isHome !== true,
               },
-            ],
-          },
-          admin: {
-            position: 'main',
-            // The homepage is served at /; keep its slug for when it becomes a regular page.
-            condition: (data) => data.isHome !== true,
-          },
-        },
-        {
-          name: 'pageURLPreview',
-          type: 'ui',
-          admin: {
-            components: { Field: '/components/admin/PageURLPreview#PageURLPreview' },
-          },
+            },
+            {
+              name: 'homepageURLPreview',
+              type: 'ui',
+              admin: {
+                condition: (data) => data.isHome === true,
+                components: {
+                  Field: {
+                    path: '/admin/components/PathPreview#PathPreview',
+                    clientProps: { pathname: '/' },
+                  },
+                },
+              },
+            },
+            {
+              name: 'isHome',
+              type: 'checkbox',
+              label: 'Homepage',
+              defaultValue: false,
+              index: true,
+              admin: {
+                description: 'Serve this page at /. Replaces the current homepage when saved.',
+                components: { Field: '/admin/components/PageHomepageField#PageHomepageField' },
+              },
+            },
+          ],
         },
         {
           name: 'meta',

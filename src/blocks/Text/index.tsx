@@ -1,6 +1,4 @@
-import type { Page } from '@/payload-types'
-
-type TextData = Extract<NonNullable<Page['layout']>[number], { blockType: 'text' }>
+import type { TextBlock as TextData } from '@/payload-types'
 
 export function TextBlock({ heading, body }: TextData) {
   return (

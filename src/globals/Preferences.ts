@@ -11,7 +11,6 @@ import {
 
 export const Preferences: GlobalConfig = {
   slug: 'preferences',
-  authorship: false,
   label: 'Preferences',
   access: {
     read: () => true,

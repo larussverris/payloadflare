@@ -62,30 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9C6201D5".
+ * via the `definition` "LexicalNodes_B2F7AB16".
  */
-export type LexicalNodes_9C6201D5 =
+export type LexicalNodes_B2F7AB16 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9C6201D5>
+  | SerializedParagraphNode<LexicalNodes_B2F7AB16>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_9C6201D5>
+  | SerializedQuoteNode<LexicalNodes_B2F7AB16>
   | SerializedRelationshipNode<
-      | 'users'
-      | 'folders'
-      | 'pages'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+      'pages' | 'users' | 'payload-kv' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_9C6201D5, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_9C6201D5, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_9C6201D5>
-  | SerializedListItemNode<LexicalNodes_9C6201D5>
-  | SerializedHeadingNode<LexicalNodes_9C6201D5>;
+  | SerializedAutoLinkNode<LexicalNodes_B2F7AB16, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_B2F7AB16, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_B2F7AB16>
+  | SerializedListItemNode<LexicalNodes_B2F7AB16>
+  | SerializedHeadingNode<LexicalNodes_B2F7AB16>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3DE324E4".
@@ -103,12 +97,16 @@ export interface Config {
   auth: {
     users: UserAuthOperations;
   };
-  blocks: {};
+  blocks: {
+    hero: HeroBlock;
+    image: ImageBlock;
+    text: TextBlock;
+    video: VideoBlock;
+  };
   collections: {
-    users: User;
     media: Media;
-    folders: Folder;
     pages: Page;
+    users: User;
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
@@ -119,10 +117,9 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
-    users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    folders: FoldersSelect<false> | FoldersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -136,12 +133,12 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
-    preferences: Preference;
     'not-found-page': NotFoundPage;
+    preferences: Preference;
   };
   globalsSelect: {
-    preferences: PreferencesSelect<false> | PreferencesSelect<true>;
     'not-found-page': NotFoundPageSelect<false> | NotFoundPageSelect<true>;
+    preferences: PreferencesSelect<false> | PreferencesSelect<true>;
   };
   locale: null;
   widgets: {
@@ -173,6 +170,64 @@ export interface UserAuthOperations {
   unlock: {
     email: string;
     password: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock".
+ */
+export interface ImageBlock {
+  image: number | Media;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  alt: string;
+  prefix?: string | null;
+  _objectKey?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  original?: {
+    filename?: string | null;
+    url?: string | null;
+    mimeType?: string | null;
+    filesize?: number | null;
+    width?: number | null;
+    height?: number | null;
+    prefix?: string | null;
+    _objectKey?: string | null;
   };
 }
 /**
@@ -211,106 +266,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media".
- */
-export interface Media {
-  id: number;
-  /**
-   * The name of the uploaded file. Only signed-in users can see it.
-   */
-  displayFilename?: string | null;
-  alt: string;
-  prefix?: string | null;
-  _objectKey?: string | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  original?: {
-    filename?: string | null;
-    url?: string | null;
-    mimeType?: string | null;
-    filesize?: number | null;
-    width?: number | null;
-    height?: number | null;
-    prefix?: string | null;
-    _objectKey?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders".
- */
-export interface Folder {
-  id: number;
-  name: string;
-  slug: string;
-  parent?: (number | null) | Folder;
-  createdBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages".
- */
-export interface Page {
-  id: number;
-  _order?: string | null;
-  layout?: (HeroBlock | TextBlock | ImageBlock | VideoBlock)[] | null;
-  title: string;
-  /**
-   * Serve this page at /. Replaces the current homepage when saved.
-   */
-  isHome?: boolean | null;
-  folder?: (number | null) | Folder;
-  slug?: string | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (number | null) | Media;
-  };
-  path?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroBlock".
- */
-export interface HeroBlock {
-  heading: string;
-  subheading?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TextBlock".
  */
 export interface TextBlock {
@@ -319,16 +274,6 @@ export interface TextBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'text';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ImageBlock".
- */
-export interface ImageBlock {
-  image: number | Media;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'image';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -350,6 +295,43 @@ export interface VideoBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  _order?: string | null;
+  parent?: (number | null) | Page;
+  layout?: (HeroBlock | ImageBlock | TextBlock | VideoBlock)[] | null;
+  title: string;
+  slug?: string | null;
+  /**
+   * Serve this page at /. Replaces the current homepage when saved.
+   */
+  isHome?: boolean | null;
+  meta?: {
+    title?: string | null;
+    description?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (number | null) | Media;
+  };
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
 export interface Form {
@@ -358,7 +340,7 @@ export interface Form {
   fields?: (Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea)[] | null;
   submitButtonLabel?: string | null;
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_9C6201D5>;
+  confirmationMessage?: LexicalRichText<LexicalNodes_B2F7AB16>;
   redirect?: {
     url: string;
   };
@@ -370,10 +352,18 @@ export interface Form {
         replyTo?: string | null;
         emailFrom?: string | null;
         subject: string;
-        message?: LexicalRichText<LexicalNodes_9C6201D5> | null;
+        message?: LexicalRichText<LexicalNodes_B2F7AB16> | null;
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -422,7 +412,7 @@ export interface Email {
  * via the `definition` "Message".
  */
 export interface Message {
-  message?: LexicalRichText<LexicalNodes_9C6201D5> | null;
+  message?: LexicalRichText<LexicalNodes_B2F7AB16> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'message';
@@ -518,6 +508,14 @@ export interface FormSubmission {
         id?: string | null;
       }[]
     | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -546,20 +544,16 @@ export interface PayloadLockedDocument {
   id: number;
   document?:
     | ({
-        relationTo: 'users';
-        value: number | User;
-      } | null)
-    | ({
         relationTo: 'media';
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'folders';
-        value: number | Folder;
-      } | null)
-    | ({
         relationTo: 'pages';
         value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: number | User;
       } | null)
     | ({
         relationTo: 'forms';
@@ -635,35 +629,9 @@ export interface PayloadLlmInstruction {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_select".
- */
-export interface UsersSelect<T extends boolean = true> {
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  email?: T;
-  resetPasswordToken?: T;
-  resetPasswordExpiration?: T;
-  salt?: T;
-  hash?: T;
-  resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
-  sessions?:
-    | T
-    | {
-        id?: T;
-        createdAt?: T;
-        expiresAt?: T;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
-  displayFilename?: T;
   alt?: T;
   prefix?: T;
   _objectKey?: T;
@@ -693,35 +661,22 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders_select".
- */
-export interface FoldersSelect<T extends boolean = true> {
-  name?: T;
-  slug?: T;
-  parent?: T;
-  createdBy?: T;
-  updatedBy?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
   _order?: T;
+  parent?: T;
   layout?:
     | T
     | {
         hero?: T | HeroBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
         image?: T | ImageBlockSelect<T>;
+        text?: T | TextBlockSelect<T>;
         video?: T | VideoBlockSelect<T>;
       };
   title?: T;
-  isHome?: T;
-  folder?: T;
   slug?: T;
+  isHome?: T;
   meta?:
     | T
     | {
@@ -729,10 +684,13 @@ export interface PagesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
-  path?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -741,6 +699,15 @@ export interface PagesSelect<T extends boolean = true> {
 export interface HeroBlockSelect<T extends boolean = true> {
   heading?: T;
   subheading?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock_select".
+ */
+export interface ImageBlockSelect<T extends boolean = true> {
+  image?: T;
   id?: T;
   blockName?: T;
 }
@@ -756,15 +723,6 @@ export interface TextBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ImageBlock_select".
- */
-export interface ImageBlockSelect<T extends boolean = true> {
-  image?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "VideoBlock_select".
  */
 export interface VideoBlockSelect<T extends boolean = true> {
@@ -773,6 +731,31 @@ export interface VideoBlockSelect<T extends boolean = true> {
   captionsLanguage?: T;
   id?: T;
   blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_select".
+ */
+export interface UsersSelect<T extends boolean = true> {
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  resetPasswordRequestedAt?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
+  sessions?:
+    | T
+    | {
+        id?: T;
+        createdAt?: T;
+        expiresAt?: T;
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -904,6 +887,8 @@ export interface FormsSelect<T extends boolean = true> {
         message?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -920,6 +905,8 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
         value?: T;
         id?: T;
       };
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -978,6 +965,26 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
   updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "not-found-page".
+ */
+export interface NotFoundPage {
+  id: number;
+  title: string;
+  layout?: (HeroBlock | ImageBlock | TextBlock | VideoBlock)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1047,20 +1054,37 @@ export interface Preference {
    * The text published at /llms.txt. Turning off AI information keeps this text for later.
    */
   llmsText?: string | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "not-found-page".
+ * via the `definition` "not-found-page_select".
  */
-export interface NotFoundPage {
-  id: number;
-  title: string;
-  layout?: (HeroBlock | TextBlock | ImageBlock | VideoBlock)[] | null;
-  _status?: ('draft' | 'published') | null;
-  updatedAt?: string | null;
-  createdAt?: string | null;
+export interface NotFoundPageSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
+    | T
+    | {
+        hero?: T | HeroBlockSelect<T>;
+        image?: T | ImageBlockSelect<T>;
+        text?: T | TextBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1102,25 +1126,8 @@ export interface PreferencesSelect<T extends boolean = true> {
       };
   enableLlmsText?: T;
   llmsText?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  globalType?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "not-found-page_select".
- */
-export interface NotFoundPageSelect<T extends boolean = true> {
-  title?: T;
-  layout?:
-    | T
-    | {
-        hero?: T | HeroBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
-        image?: T | ImageBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-      };
-  _status?: T;
+  createdBy?: T;
+  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
@@ -1152,7 +1159,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'media' | 'folders' | 'pages' | 'forms' | 'form-submissions';
+    relatedCollection: 'media' | 'pages' | 'users' | 'forms' | 'form-submissions';
     where?:
       | {
           [k: string]: unknown;
@@ -1174,7 +1181,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'media' | 'folders' | 'pages' | 'forms' | 'form-submissions')[] | null;
+    excludedCollections?: ('media' | 'pages' | 'users' | 'forms' | 'form-submissions')[] | null;
   };
   width: 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

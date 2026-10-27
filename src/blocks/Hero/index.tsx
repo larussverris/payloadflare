@@ -1,6 +1,4 @@
-import type { Page } from '@/payload-types'
-
-type HeroData = Extract<NonNullable<Page['layout']>[number], { blockType: 'hero' }>
+import type { HeroBlock as HeroData } from '@/payload-types'
 
 export function HeroBlock({ heading, subheading }: HeroData) {
   return (

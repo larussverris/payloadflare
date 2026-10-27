@@ -13,10 +13,7 @@ const sitemap = unstable_cache(
       depth: 0,
       pagination: false,
       select: {
-        path: true,
-        slug: true,
-        folder: true,
-        isHome: true,
+        _h_slugPath: true,
         updatedAt: true,
       },
       where: {
@@ -24,14 +21,14 @@ const sitemap = unstable_cache(
         isHome: { not_equals: true },
       },
     })
-    const siteURL = process.env.NEXT_PUBLIC_SERVER_URL!
+    const siteURL = payload.config.serverURL
 
     const entries: MetadataRoute.Sitemap = [{ url: new URL('/', siteURL).href }]
     for (const page of docs) {
-      if (!page.path) continue
+      if (!page._h_slugPath) continue
 
       entries.push({
-        url: new URL(page.path, siteURL).href,
+        url: new URL(`/${page._h_slugPath}`, siteURL).href,
         lastModified: page.updatedAt,
       })
     }

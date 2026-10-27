@@ -7,6 +7,7 @@ const eslintConfig = defineConfig([
   ...nextTypescript,
   {
     rules: {
+      'import/exports-last': 'error',
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-explicit-any': 'warn',

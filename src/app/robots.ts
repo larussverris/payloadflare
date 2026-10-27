@@ -1,15 +1,16 @@
 import type { MetadataRoute } from 'next'
+import config from '@payload-config'
 
-const siteUrl = process.env.NEXT_PUBLIC_SERVER_URL
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const { serverURL } = await config
 
-export default function robots(): MetadataRoute.Robots {
   return {
-    host: siteUrl,
+    host: serverURL,
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/admin', '/api'],
     },
-    sitemap: `${siteUrl}/sitemap.xml`,
+    sitemap: new URL('/sitemap.xml', serverURL).href,
   }
 }
