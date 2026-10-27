@@ -16,7 +16,7 @@ const getNotFoundPage = unstable_cache(
     })
   },
   ['not-found-page'],
-  { tags: ['site'], revalidate: 3600 },
+  { revalidate: 3600 },
 )
 
 export default async function NotFound() {

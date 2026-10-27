@@ -36,7 +36,7 @@ const sitemap = unstable_cache(
     return entries
   },
   ['sitemap'],
-  { tags: ['site'], revalidate: 3600 },
+  { revalidate: 3600 },
 )
 
 export default sitemap

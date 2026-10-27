@@ -1,11 +1,10 @@
-import { revalidatePath, revalidateTag } from 'next/cache'
+import { revalidatePath } from 'next/cache'
 import type { PayloadRequest, Plugin } from 'payload'
 
 type HookArgs<T> = { doc: T; previousDoc?: T; req: PayloadRequest }
 
 function revalidateSite<T>({ doc, req }: HookArgs<T>): T {
   if (!req.context.disableRevalidate) {
-    revalidateTag('site', { expire: 0 })
     revalidatePath('/', 'layout')
   }
   return doc

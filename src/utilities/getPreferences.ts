@@ -8,5 +8,5 @@ export const getPreferences = unstable_cache(
     return payload.findGlobal({ slug: 'preferences', depth: 1, overrideAccess: false })
   },
   ['preferences'],
-  { tags: ['site'], revalidate: 3600 },
+  { revalidate: 3600 },
 )

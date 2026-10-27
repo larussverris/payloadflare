@@ -36,7 +36,6 @@ const findPageByPath = unstable_cache(
   },
   undefined,
   {
-    tags: ['site'], // Clear cached pages when the site is revalidated.
     revalidate: 3600,
   },
 )
