@@ -2,11 +2,11 @@ import type { ComponentType } from 'react'
 import * as blockRenderers from '@/blocks'
 import type { BlockData } from '@/blocks/types'
 
-/** Renders saved blocks using the site's registry, throwing if a renderer is missing. */
+/** Renders saved blocks, skipping any without a registered implementation. */
 export function renderBlocks(blocks: readonly BlockData[] | null | undefined) {
   return blocks?.map((block, index) => {
     if (!Object.hasOwn(blockRenderers, block.blockType)) {
-      throw new Error(`Missing renderer for block: ${block.blockType}`)
+      return null
     }
 
     // The registry checks each component's props. Dynamic indexing loses the
