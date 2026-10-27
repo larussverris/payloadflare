@@ -3,7 +3,6 @@ import 'server-only'
 import { draftMode } from 'next/headers'
 import type { ReactNode } from 'react'
 
-import { exitPreviewAction } from '@/actions/exitPreview'
 import { LivePreviewShell } from './LivePreviewShell'
 
 type LivePreviewProps = {
@@ -13,6 +12,12 @@ type LivePreviewProps = {
 
 /** Render once in the frontend layout to show draft status and refresh after saves. */
 async function LivePreview(props: LivePreviewProps) {
+  async function exitPreviewAction() {
+    'use server'
+    const draft = await draftMode()
+    draft.disable()
+  }
+
   const { isEnabled } = await draftMode()
 
   // If Draft Mode is not enabled, render the page normally.
