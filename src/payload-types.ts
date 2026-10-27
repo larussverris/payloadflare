@@ -98,7 +98,6 @@ export interface Config {
     users: UserAuthOperations;
   };
   blocks: {
-    hero: HeroBlock;
     image: ImageBlock;
     text: TextBlock;
     video: VideoBlock;
@@ -171,17 +170,6 @@ export interface UserAuthOperations {
     email: string;
     password: string;
   };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroBlock".
- */
-export interface HeroBlock {
-  heading: string;
-  subheading?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'hero';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -301,7 +289,7 @@ export interface Page {
   id: number;
   _order?: string | null;
   parent?: (number | null) | Page;
-  layout?: (HeroBlock | ImageBlock | TextBlock | VideoBlock)[] | null;
+  layout?: (ImageBlock | TextBlock | VideoBlock)[] | null;
   title: string;
   slug?: string | null;
   /**
@@ -669,7 +657,6 @@ export interface PagesSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        hero?: T | HeroBlockSelect<T>;
         image?: T | ImageBlockSelect<T>;
         text?: T | TextBlockSelect<T>;
         video?: T | VideoBlockSelect<T>;
@@ -691,16 +678,6 @@ export interface PagesSelect<T extends boolean = true> {
   _status?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "HeroBlock_select".
- */
-export interface HeroBlockSelect<T extends boolean = true> {
-  heading?: T;
-  subheading?: T;
-  id?: T;
-  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -973,7 +950,7 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 export interface NotFoundPage {
   id: number;
   title: string;
-  layout?: (HeroBlock | ImageBlock | TextBlock | VideoBlock)[] | null;
+  layout?: (ImageBlock | TextBlock | VideoBlock)[] | null;
   createdBy?: {
     relationTo: 'users';
     value: number | User;
@@ -1074,7 +1051,6 @@ export interface NotFoundPageSelect<T extends boolean = true> {
   layout?:
     | T
     | {
-        hero?: T | HeroBlockSelect<T>;
         image?: T | ImageBlockSelect<T>;
         text?: T | TextBlockSelect<T>;
         video?: T | VideoBlockSelect<T>;
