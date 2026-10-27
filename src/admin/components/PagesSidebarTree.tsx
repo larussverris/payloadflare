@@ -17,7 +17,7 @@ import { HomeIcon } from '@/admin/icons/HomeIcon'
 
 type Branch = { page: SidebarPage; children: Branch | null }[]
 
-export function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
+function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   adminRoute: string; hasMore: boolean; pages: SidebarPage[]
 }) {
   const sdk = usePayloadSDK()
@@ -270,3 +270,5 @@ function TreeDragMonitor({ ids, homeKey, onChange }: {
   useDndMonitor({ onDragMove: update, onDragOver: update, onDragEnd: () => onChange(null), onDragCancel: () => onChange(null) })
   return null
 }
+
+export { PagesSidebarTree }

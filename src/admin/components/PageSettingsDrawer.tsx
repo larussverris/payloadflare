@@ -23,16 +23,16 @@ import { isSidebarPageSettings, pageSettingsSlug } from './PageHeadingSettings'
 
 const InPageSettings = createContext(false)
 
-export function PageParentField(props: RelationshipFieldClientProps) {
+function PageParentField(props: RelationshipFieldClientProps) {
   return useContext(InPageSettings) ? <RelationshipField {...props} /> : null
 }
 
-export function PageLayoutField(props: BlocksFieldClientProps) {
+function PageLayoutField(props: BlocksFieldClientProps) {
   const { drawerSlug } = useDocumentDrawerContext()
   return isSidebarPageSettings(drawerSlug) ? null : <BlocksField {...props} />
 }
 
-export function PageSettingsDrawer(props: RowFieldClientProps) {
+function PageSettingsDrawer(props: RowFieldClientProps) {
   const { drawerSlug } = useDocumentDrawerContext()
   return isSidebarPageSettings(drawerSlug) ? <PageSettingsFields {...props} /> : <PageSettingsModal {...props} />
 }
@@ -146,3 +146,5 @@ function PageSettingsModal(props: RowFieldClientProps) {
     </Drawer>
   )
 }
+
+export { PageParentField, PageLayoutField, PageSettingsDrawer }

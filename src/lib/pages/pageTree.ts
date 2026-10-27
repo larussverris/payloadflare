@@ -1,4 +1,4 @@
-export type SidebarPage = {
+type SidebarPage = {
   id: number | string
   title: string
   parentId?: number | string | null
@@ -18,3 +18,5 @@ export function comparePages(a: OrderedPage, b: OrderedPage) {
   }
   return String(a.id).localeCompare(String(b.id), undefined, { numeric: true })
 }
+
+export type { SidebarPage }

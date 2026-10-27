@@ -3,7 +3,7 @@ import path from 'path'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { findDistinct, upsert } from '@payloadcms/drizzle'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { buildConfig } from 'payload'
+import { buildConfig, type Config } from 'payload'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
@@ -54,14 +54,14 @@ const cloudflareLogger = {
   error: createLog('error', console.error),
   fatal: createLog('fatal', console.error),
   silent: () => {},
-} as any // Use PayloadLogger type when it's exported
+} as unknown as Exclude<Config['logger'], boolean | undefined> // Console adapter for Payload's logger contract.
 
 const cloudflare =
   isCLI || !isProduction
     ? await getCloudflareContextFromWrangler()
     : await getCloudflareContext({ async: true })
 
-export default buildConfig({
+const config = buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
   admin: {
     components: {
@@ -182,3 +182,5 @@ function sqliteD1AdapterWithFixes(args: Parameters<typeof sqliteD1Adapter>[0]) {
     },
   }
 }
+
+export default config

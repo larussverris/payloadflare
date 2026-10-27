@@ -1,7 +1,7 @@
 import { extname } from 'node:path'
 import type { CollectionBeforeOperationHook, Plugin } from 'payload'
 
-export interface VersionedFilenamesOptions {
+interface VersionedFilenamesOptions {
   /** Slugs of upload collections that should receive random filenames. Defaults to `media`. */
   collections?: string[]
 }
@@ -81,3 +81,5 @@ export const versionedFilenames = (
     }),
   })
 }
+
+export type { VersionedFilenamesOptions }

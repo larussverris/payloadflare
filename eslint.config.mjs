@@ -25,7 +25,17 @@ const eslintConfig = defineConfig([
       ],
     },
   },
-  globalIgnores(['.next/**', 'src/payload-types.ts', 'src/payload-generated-schema.ts']),
+  {
+    // Payload owns these entrypoints and may regenerate their export order.
+    files: ['src/app/(payload)/admin/**/{page,not-found}.tsx'],
+    rules: { 'import/exports-last': 'off' },
+  },
+  globalIgnores([
+    '.next/**',
+    'cloudflare-env.d.ts',
+    'src/payload-types.ts',
+    'src/payload-generated-schema.ts',
+  ]),
 ])
 
 export default eslintConfig
