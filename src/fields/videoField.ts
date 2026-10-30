@@ -9,8 +9,9 @@ import type { UploadField } from 'payload'
 import { mediaField, type MediaFieldOptions } from './mediaField'
 
 export function videoField(options: MediaFieldOptions = {}): UploadField {
-  return {
-    ...mediaField({ label: 'Video', ...options }),
+  return mediaField({
+    label: 'Video',
     filterOptions: { mimeType: { contains: 'video/' } },
-  }
+    ...options,
+  })
 }

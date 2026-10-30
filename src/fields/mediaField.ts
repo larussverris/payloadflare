@@ -10,12 +10,14 @@ export type MediaFieldOptions = {
   name?: string
   label?: string
   required?: boolean
+  filterOptions?: UploadField['filterOptions']
 }
 
 export function mediaField({
   name = 'media',
   label = 'Media',
   required = false,
+  filterOptions,
 }: MediaFieldOptions = {}): UploadField {
   return {
     name,
@@ -23,5 +25,6 @@ export function mediaField({
     type: 'upload',
     relationTo: 'media',
     required,
+    filterOptions,
   }
 }

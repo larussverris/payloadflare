@@ -120,7 +120,6 @@ Verify a same-name file replacement in the admin and on the deployed site: the r
 
 This template ships without migration history. Generate an initial migration before your first deployment, then generate migrations for subsequent schema changes. Commit the generated migration files and index to your project repository:
 
-
 ```bash
 pnpm payload migrate:create
 ```

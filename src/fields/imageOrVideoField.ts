@@ -9,10 +9,11 @@ import type { UploadField } from 'payload'
 import { mediaField, type MediaFieldOptions } from './mediaField'
 
 export function imageOrVideoField(options: MediaFieldOptions = {}): UploadField {
-  return {
-    ...mediaField({ label: 'Image or video', ...options }),
+  return mediaField({
+    label: 'Image or video',
     filterOptions: {
       or: [{ mimeType: { contains: 'image/' } }, { mimeType: { contains: 'video/' } }],
     },
-  }
+    ...options,
+  })
 }
