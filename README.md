@@ -112,7 +112,7 @@ On a cache miss, Payload retrieves the image from R2. On a hit, Cloudflare serve
 
 After deploying, request the same uploaded image twice using `curl -sS -D - -o /dev/null https://yourdomain.com/api/media/file/example.jpg` and check for `CF-Cache-Status: HIT` on a repeated request. Also verify `/admin` and `/api/media` do not produce cache hits. Edge behavior must be verified on Cloudflare, not just with `pnpm dev`.
 
-Media keeps Payload's normal upload filenames. The `mediaURLVersions` plugin in `src/plugins/mediaURLVersions.ts` is configured for Media in Payload config. It attaches an `afterRead` hook that appends `?v=<updatedAt timestamp>` to file, thumbnail, and image-size URLs. Replacing a file or editing metadata changes the URL version, allowing browsers and Cloudflare to fetch fresh content. Consumers should use the returned `url` rather than reconstructing a URL from `filename`, and selected media reads must include `updatedAt` to receive versioning. Cache keys must include the `v` query parameter. Existing randomly named R2 objects are not renamed; their URLs also receive versions. The legacy `displayFilename` field has been removed; existing installations should generate their own cleanup migration. The filename-randomization plugin is no longer enabled.
+Media keeps Payload's normal upload filenames. The `mediaURLVersions` plugin from the `@payloadflare/media-url-versions` workspace package in `packages/media-url-versions/` is configured for Media in Payload config. It attaches an `afterRead` hook that appends `?v=<updatedAt timestamp>` to the main file URL only. It leaves `thumbnailURL` and image-size URLs unchanged. Replacing a file or editing metadata changes the URL version, allowing browsers and Cloudflare to fetch fresh content. Consumers should use the returned `url` rather than reconstructing a URL from `filename`, and selected media reads must include `updatedAt` to receive versioning. Cache keys must include the `v` query parameter. Existing randomly named R2 objects are not renamed; their URLs also receive versions. The legacy `displayFilename` field has been removed; existing installations should generate their own cleanup migration. The filename-randomization plugin is no longer enabled.
 
 Verify a same-name file replacement in the admin and on the deployed site: the returned URL's `v` value should change and the new URL should serve the replacement bytes. Old URLs can continue serving cached content until expiry; query versions are cache keys, not archived file versions. Purging cannot remove copies already cached in browsers.
 
@@ -139,8 +139,7 @@ one. The template does not seed a homepage through migrations.
 
 Create other pages with a single slug segment, such as `team`, and optionally
 choose a parent to produce a URL such as `/about/team`. One optional catch-all
-route renders Home and regular pages. Avoid existing routes such as `admin` and
-`api`. Missing and unpublished pages return 404 to public visitors.
+route renders Home and regular pages. Avoid existing routes such as `admin`, `api`, and `preview`. Missing and unpublished pages return 404 to public visitors.
 
 The editable 404 global is shown as a Payload UI card below the Pages list and pagination. Unexpected errors
 use Next.js’s built-in error page.
@@ -155,14 +154,27 @@ in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend re
 in `index.tsx`. Use named component exports and import implementations from the
 block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
 
-Live preview is implemented in `src/components/live-preview`, with an authenticated
-`/api/preview` Next.js Route Handler and explicit draft/autosave settings on Pages and the 404 global.
-The handler authenticates the Payload session, enables Next.js Draft Mode, and redirects
-to a same-origin preview path. Preview entry uses GET because the CMS opens a URL;
-exiting preview uses the Server Action in `src/actions/exitPreview.ts`.
-Open Live Preview from the editor to render drafts and refresh after autosaves.
-Preview reads stay within the current request; public reads and the sitemap include
-only published pages. Set `NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
+Preview uses dedicated, authenticated URLs under `/preview`. The admin's Preview
+button opens a standalone draft preview; Live Preview uses the same routes inside
+its iframe and refreshes after autosaves. Pages preview at `/preview/<page-path>`,
+and the homepage at `/preview`. Any unmatched preview path renders the 404 global's
+draft; its admin preview link uses `/preview/not-found-preview` as a missing path.
+
+Every preview read verifies the Payload session and reads drafts without the public
+cache. Preview responses are dynamic and marked `noindex`. Public URLs always read
+published content, even for signed-in editors or browsers with an old Draft Mode
+cookie. Preview does not set a Draft Mode cookie and needs no exit-preview action.
+
+Reserve the `/preview` prefix for this feature. Preview links follow saved slugs
+and hierarchy; new documents must be saved before previewing. Set
+`NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
+
+## Site revalidation
+
+`src/payload.config.ts` attaches shared Payload hooks when registering collections
+and globals, preserving their existing hooks. The hooks revalidate the site after
+published changes, unpublishing, changes to content without drafts, and collection
+document deletions. Autosaves and draft-only saves are skipped.
 
 ## Page SEO
 

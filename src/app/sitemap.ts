@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates. Sitemap entries
+ * are generated automatically from published pages in Payload.
+ */
+
 import type { MetadataRoute } from 'next'
 import { unstable_cache } from 'next/cache'
 import config from '@payload-config'

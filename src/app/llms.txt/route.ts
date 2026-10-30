@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates. Edit llms.txt
+ * content and enable or disable it through Preferences in the Payload admin.
+ */
+
 import { getPreferences } from '@/utilities/getPreferences'
 
 export async function GET() {

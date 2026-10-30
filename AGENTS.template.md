@@ -1,5 +1,10 @@
 # Template agent instructions
 
+This file is template-maintained. Users and AI agents should avoid project-specific
+edits here to reduce conflicts when merging upstream template updates. Add your
+own project-specific agent instructions to `AGENTS.md`, keeping its instruction
+to read this file.
+
 This repository is a starter for Payload CMS on Cloudflare Workers, using Next.js,
 OpenNext, Cloudflare D1, and R2.
 

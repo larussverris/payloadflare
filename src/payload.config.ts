@@ -1,9 +1,14 @@
 import fs from 'fs'
 import path from 'path'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
-import { findDistinct, upsert } from '@payloadcms/drizzle'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { buildConfig, type Config } from 'payload'
+import {
+  buildConfig,
+  type CollectionConfig,
+  type GlobalConfig,
+  type Config,
+} from 'payload'
+import { revalidatePath } from 'next/cache'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
 import { GetPlatformProxyOptions } from 'wrangler'
@@ -11,8 +16,7 @@ import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
-import { revalidateSiteOnSave } from './plugins/revalidateSiteOnSave'
-import { mediaURLVersions } from './plugins/mediaURLVersions'
+import { mediaURLVersions } from '@payloadflare/media-url-versions'
 import * as blockSchemas from '@/blocks/config'
 import * as collections from '@/collections'
 import * as globals from '@/globals'
@@ -90,14 +94,58 @@ const config = buildConfig({
     },
   },
   // Payload mutates schemas during initialization; keep module exports clean for hot reload.
-  collections: Object.values(collections),
-  globals: Object.values(globals),
+  collections: Object.values(collections).map((collection): CollectionConfig => ({
+    ...collection,
+    hooks: {
+      ...collection.hooks,
+      afterChange: [
+        ...(collection.hooks?.afterChange ?? []),
+        ({ doc, previousDoc, req }) => {
+          if (req.query?.autosave === true || req.query?.autosave === 'true') return
+
+          // Revalidate published changes and unpublishing, but skip draft-only saves.
+          const hasDraftStatus = '_status' in doc
+          const isPublished = doc._status === 'published'
+          const wasPublished = previousDoc?._status === 'published'
+          if (hasDraftStatus && !isPublished && !wasPublished) return
+
+          revalidatePath('/', 'layout')
+        },
+      ],
+      afterDelete: [
+        ...(collection.hooks?.afterDelete ?? []),
+        () => {
+          revalidatePath('/', 'layout')
+        },
+      ],
+    },
+  })),
+  globals: Object.values(globals).map((global): GlobalConfig => ({
+    ...global,
+    hooks: {
+      ...global.hooks,
+      afterChange: [
+        ...(global.hooks?.afterChange ?? []),
+        ({ doc, previousDoc, req }) => {
+          if (req.query?.autosave === true || req.query?.autosave === 'true') return
+
+          // Revalidate published changes and unpublishing, but skip draft-only saves.
+          const hasDraftStatus = '_status' in doc
+          const isPublished = doc._status === 'published'
+          const wasPublished = previousDoc?._status === 'published'
+          if (hasDraftStatus && !isPublished && !wasPublished) return
+
+          revalidatePath('/', 'layout')
+        },
+      ],
+    },
+  })),
   blocks: Object.values(blockSchemas),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
-  db: sqliteD1AdapterWithFixes({
+  db: sqliteD1Adapter({
     binding: cloudflare.env.D1,
     blocksAsJSON: true,
     readReplicas: 'first-primary',
@@ -126,10 +174,6 @@ const config = buildConfig({
       fields: {
         payment: false,
       },
-    }),
-    revalidateSiteOnSave({
-      collections: Object.values(collections).map(({ slug }) => slug),
-      globals: Object.values(globals).map(({ slug }) => slug),
     }),
   ],
   storage: [
@@ -164,23 +208,6 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
         remoteBindings: isProduction,
       } satisfies GetPlatformProxyOptions),
   )
-}
-
-function sqliteD1AdapterWithFixes(args: Parameters<typeof sqliteD1Adapter>[0]) {
-  const adapterConfig = sqliteD1Adapter(args)
-  const originalInit = adapterConfig.init
-
-  return {
-    ...adapterConfig,
-    init: (initArgs: Parameters<typeof originalInit>[0]) => {
-      const adapter = originalInit(initArgs)
-      // Payload 4 beta omits this method from the D1 adapter, though its list view uses it.
-      adapter.findDistinct = findDistinct
-      // The beta wires upsert to updateOne without enabling insertion of missing preferences.
-      adapter.upsert = upsert
-      return adapter
-    },
-  }
 }
 
 export default config

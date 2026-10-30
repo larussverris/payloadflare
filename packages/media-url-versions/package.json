@@ -1,0 +1,12 @@
+{
+  "name": "@payloadflare/media-url-versions",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "peerDependencies": {
+    "payload": "catalog:"
+  }
+}

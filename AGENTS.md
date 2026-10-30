@@ -2,6 +2,9 @@
 
 Read `AGENTS.template.md` before working in this repository.
 
+Add project-specific agent instructions to this file. Keep template-maintained
+instructions in `AGENTS.template.md` unchanged when customizing your project.
+
 <!-- BEGIN:nextjs-agent-rules -->
 
 ## This is NOT the Next.js you know

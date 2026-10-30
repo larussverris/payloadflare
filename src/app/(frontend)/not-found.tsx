@@ -1,18 +1,17 @@
 import { unstable_cache } from 'next/cache'
 import config from '@payload-config'
-import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 
 import { renderBlocks } from '@/utilities/renderBlocks'
 import type { NotFoundPage } from '@/payload-types'
 
 const getNotFoundPage = unstable_cache(
-  async (isPreview: boolean) => {
+  async () => {
     const payload = await getPayload({ config })
     return payload.findGlobal({
       slug: 'not-found-page',
-      draft: isPreview,
-      overrideAccess: isPreview,
+      draft: false,
+      overrideAccess: false,
     })
   },
   ['not-found-page'],
@@ -20,10 +19,9 @@ const getNotFoundPage = unstable_cache(
 )
 
 export default async function NotFound() {
-  const { isEnabled } = await draftMode()
   let page: NotFoundPage | undefined
   try {
-    page = await getNotFoundPage(isEnabled)
+    page = await getNotFoundPage()
   } catch (error) {
     console.error('Unable to load the 404 page content.', error)
   }

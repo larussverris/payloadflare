@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest } from 'payload'
 import * as blocks from '@/blocks/config'
 import {
   MetaDescriptionField,
@@ -7,6 +7,21 @@ import {
   OverviewField,
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
+
+async function getPreviewURL(id: unknown, req: PayloadRequest) {
+  if (typeof id !== 'number' && typeof id !== 'string') return null
+  const page = await req.payload.findByID({
+    collection: 'pages',
+    id,
+    draft: true,
+    depth: 0,
+    context: { computeHierarchyPaths: true },
+    select: { _h_slugPath: true, isHome: true },
+    req,
+  })
+  if (page.isHome) return '/preview'
+  return page._h_slugPath ? `/preview/${page._h_slugPath}` : null
+}
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
@@ -23,21 +38,10 @@ export const Pages: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 200 } } },
   admin: {
+    preview: (doc, { req }) => getPreviewURL(doc.id, req),
     livePreview: {
       openByDefault: true,
-      url: async ({ data, req }) => {
-        if (!data.id) return null
-        const page = await req.payload.findByID({
-          collection: 'pages',
-          id: data.id,
-          draft: true,
-          depth: 0,
-          select: { _h_slugPath: true, isHome: true },
-          req,
-        })
-        const pathname = page.isHome ? '/' : page._h_slugPath ? `/${page._h_slugPath}` : null
-        return pathname ? `/api/preview?${new URLSearchParams({ path: pathname })}` : null
-      },
+      url: ({ data, req }) => getPreviewURL(data.id, req),
     },
     group: false,
     components: {
