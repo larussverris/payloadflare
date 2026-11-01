@@ -132,10 +132,14 @@ export interface Config {
   };
   fallbackLocale: null;
   globals: {
+    footer: Footer;
+    header: Header;
     'not-found-page': NotFoundPage;
     preferences: Preference;
   };
   globalsSelect: {
+    footer: FooterSelect<false> | FooterSelect<true>;
+    header: HeaderSelect<false> | HeaderSelect<true>;
     'not-found-page': NotFoundPageSelect<false> | NotFoundPageSelect<true>;
     preferences: PreferencesSelect<false> | PreferencesSelect<true>;
   };
@@ -945,6 +949,42 @@ export interface PayloadLlmInstructionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer".
+ */
+export interface Footer {
+  id: number;
+  layout?: (ImageBlock | TextBlock | VideoBlock)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header".
+ */
+export interface Header {
+  id: number;
+  layout?: (ImageBlock | TextBlock | VideoBlock)[] | null;
+  createdBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedBy?: {
+    relationTo: 'users';
+    value: number | User;
+  } | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "not-found-page".
  */
 export interface NotFoundPage {
@@ -1041,6 +1081,42 @@ export interface Preference {
   } | null;
   updatedAt?: string | null;
   createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer_select".
+ */
+export interface FooterSelect<T extends boolean = true> {
+  layout?:
+    | T
+    | {
+        image?: T | ImageBlockSelect<T>;
+        text?: T | TextBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header_select".
+ */
+export interface HeaderSelect<T extends boolean = true> {
+  layout?:
+    | T
+    | {
+        image?: T | ImageBlockSelect<T>;
+        text?: T | TextBlockSelect<T>;
+        video?: T | VideoBlockSelect<T>;
+      };
+  createdBy?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
