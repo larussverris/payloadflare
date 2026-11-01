@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates. Manage site
+ * preferences in Payload; this helper handles fetching and caching them.
+ */
+
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'

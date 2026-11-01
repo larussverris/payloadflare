@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates. Reuse this helper
+ * to authenticate preview requests and access Payload.
+ */
+
 import 'server-only'
 
 import config from '@payload-config'

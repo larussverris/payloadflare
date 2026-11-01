@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates. Reuse this hook
+ * for the configured Payload SDK in admin components.
+ */
+
 'use client'
 
 import { PayloadSDK } from '@payloadcms/sdk'
