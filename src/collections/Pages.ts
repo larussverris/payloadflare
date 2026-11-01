@@ -19,8 +19,8 @@ async function getPreviewURL(id: unknown, req: PayloadRequest) {
     select: { _h_slugPath: true, isHome: true },
     req,
   })
-  if (page.isHome) return '/preview'
-  return page._h_slugPath ? `/preview/${page._h_slugPath}` : null
+  const path = page.isHome ? '/' : page._h_slugPath ? `/${page._h_slugPath}` : null
+  return path ? `/preview?${new URLSearchParams({ path })}` : null
 }
 
 export const Pages: CollectionConfig = {

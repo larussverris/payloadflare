@@ -989,7 +989,6 @@ export interface Header {
  */
 export interface NotFoundPage {
   id: number;
-  title: string;
   layout?: (ImageBlock | TextBlock | VideoBlock)[] | null;
   createdBy?: {
     relationTo: 'users';
@@ -1123,7 +1122,6 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "not-found-page_select".
  */
 export interface NotFoundPageSelect<T extends boolean = true> {
-  title?: T;
   layout?:
     | T
     | {
