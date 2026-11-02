@@ -17,24 +17,6 @@
   text-decoration: underline;
 }
 
-.page-homepage__button {
-  width: 100%;
-  margin: 0;
-  border: 0;
-  text-align: start;
-}
-
-.page-homepage__button:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-homepage__button svg {
-  flex-shrink: 0;
-  height: 16px;
-  width: 16px;
-}
-
 #toggle-list-filters,
 #list-controls-where {
   display: none !important;

@@ -2,13 +2,13 @@
 
 import type { CheckboxFieldClientProps } from 'payload'
 import {
+  Button,
   ConfirmationModal,
   FieldError,
   useConfig,
   useDocumentEvents,
   useDocumentInfo,
   useField,
-  useFormFields,
   useModal,
 } from '@payloadcms/ui'
 import { useEffect, useId, useState } from 'react'
@@ -25,7 +25,6 @@ export function PageHomepageField({ path, readOnly }: CheckboxFieldClientProps) 
   const { id } = useDocumentInfo()
   const { config: { routes: { admin } } } = useConfig()
   const sdk = usePayloadSDK()
-  const title = useFormFields(([fields]) => fields.title?.value as string) || 'Untitled'
   const { mostRecentUpdate } = useDocumentEvents()
   const [homepage, setHomepage] = useState<Homepage | null>()
   const [loadError, setLoadError] = useState(false)
@@ -68,20 +67,19 @@ export function PageHomepageField({ path, readOnly }: CheckboxFieldClientProps) 
       <p className="page-homepage__description" aria-live="polite">
         {renderHomepageDescription()}
       </p>
-      {!value && <button
+      {!value && <Button
         type="button"
-        className="banner banner--type-default banner--has-action page-homepage__button"
+        icon={<HomeIcon />}
+        iconPosition="left"
+        margin={false}
         disabled={isReadOnly}
         onClick={() => {
           if (isReadOnly) return
           openModal(modalSlug)
         }}
       >
-        <HomeIcon />
-        <span className="banner__content">
-          {`Make “${title}” Your Homepage`}
-        </span>
-      </button>}
+        Make homepage
+      </Button>}
       <FieldError path={path} showError={showError} />
       <ConfirmationModal
         body="This page will become the homepage at /. It will replace the current homepage, which will return to its regular page URL. This change may be saved automatically."
