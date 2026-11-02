@@ -11,7 +11,6 @@ export const NotFoundPage: GlobalConfig = {
   },
   admin: {
     group: false,
-    preview: () => '/preview?path=/not-found-preview',
     livePreview: {
       openByDefault: true,
       url: '/preview?path=/not-found-preview',

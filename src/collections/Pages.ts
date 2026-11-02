@@ -38,7 +38,6 @@ export const Pages: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 200 } } },
   admin: {
-    preview: (doc, { req }) => getPreviewURL(doc.id, req),
     livePreview: {
       openByDefault: true,
       url: ({ data, req }) => getPreviewURL(data.id, req),
