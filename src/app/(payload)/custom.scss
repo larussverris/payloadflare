@@ -1,3 +1,8 @@
+// Hide the Live Preview toolbar to keep the editing UI simple and approachable.
+.live-preview-toolbar {
+  display: none;
+}
+
 .page-homepage {
   margin-bottom: var(--spacing-field);
 }
