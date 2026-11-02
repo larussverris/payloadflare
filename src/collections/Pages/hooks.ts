@@ -7,30 +7,12 @@ export async function getPagePreviewURL(id: unknown, req: PayloadRequest) {
     id,
     draft: true,
     depth: 0,
-    select: { path: true },
     req,
   })
   return path ? `/preview?${new URLSearchParams({ path })}` : null
 }
 
 export const pageHooks: NonNullable<CollectionConfig['hooks']> = {
-  beforeOperation: [
-    ({ args, operation, context }) => {
-      if (operation !== 'read') return args
-      context.computeHierarchyPaths = true
-      const select = 'select' in args ? args.select : undefined
-
-      // Every read needs the source fields, including native slug for this beta.
-      if (select) {
-        const inclusive = Object.values(select).some((value) => value !== false)
-        for (const field of ['path', 'isHome', '_h_slugPath', 'slug', 'parent']) {
-          if (inclusive) select[field] = true
-          else delete select[field]
-        }
-      }
-      return args
-    },
-  ],
   // Native hierarchy afterRead runs after custom afterRead hooks in this beta.
   // afterOperation sees its completed paths, including on populated relationships.
   afterOperation: [

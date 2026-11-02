@@ -15,6 +15,14 @@ export const Pages: CollectionConfig = {
   defaultPopulate: {
     title: true,
     path: true,
+    isHome: true,
+    _h_slugPath: true,
+    slug: true,
+    parent: true,
+  },
+  select: ({ operation, req }) => {
+    if (operation === 'read') req.context.computeHierarchyPaths = true
+    return undefined
   },
   orderable: true,
   hierarchy: {
