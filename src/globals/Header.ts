@@ -7,6 +7,12 @@ export const Header: GlobalConfig = {
   access: {
     read: () => true,
   },
+  admin: {
+    livePreview: {
+      openByDefault: true,
+      url: '/preview?path=/',
+    },
+  },
   fields: [
     {
       name: 'layout',
