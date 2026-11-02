@@ -9,7 +9,7 @@ import { useDndMonitor, type DragMoveEvent } from '@dnd-kit/core'
 import {
   Button, ChevronIcon, DocumentIcon, DraggableSortable, DragHandleIcon, Link,
   NavGroup, Popup, PopupList, toast, useDocumentEvents,
-  useDraggableSortable, useNav, usePreferences, useRouteTransition, useRouter, useSidebarTabs,
+  useDraggableSortable, usePreferences, useRouteTransition, useRouter, useSidebarTabs,
 } from '@payloadcms/ui'
 import { usePathname, useRouter as useNextRouter } from 'next/navigation'
 import { PREFERENCE_KEYS } from 'payload/shared'
@@ -35,7 +35,6 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   }, [reloadTabContent, refreshRoute])
   const pathname = usePathname()
   const { startRouteTransition } = useRouteTransition()
-  const { setNavOpen } = useNav()
   const { setPreference } = usePreferences()
   const { mostRecentUpdate } = useDocumentEvents()
   const lastDocumentEvent = useRef(mostRecentUpdate)
@@ -66,7 +65,6 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   const navigate = async (event: MouseEvent<Element>, href: string) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return
     event.preventDefault()
-    setNavOpen(false, true)
     await setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: 'site-pages' }).catch(() => undefined)
     startRouteTransition(() => { void router.push(href) })
   }
@@ -75,7 +73,6 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
     setCreatingPage(true)
     try {
       const page = await sdk.create({ collection: 'pages', draft: true, data: { title: 'Untitled', slug: '' } })
-      setNavOpen(false, true)
       await setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: 'site-pages' }).catch(() => undefined)
       startRouteTransition(() => { void router.push(`${pageRoute}${page.id}`) })
       refresh()
