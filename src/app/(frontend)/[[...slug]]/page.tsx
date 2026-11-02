@@ -21,6 +21,7 @@ const findPageByPath = unstable_cache(
       docs: [page],
     } = await payload.find({
       collection: 'pages',
+      depth: 2,
       context: { computeHierarchyPaths: true },
       // Explicitly select the native path so all ancestors are included in this beta.
       select: { _h_slugPath: true, isHome: true, title: true, meta: true, layout: true },
