@@ -14,27 +14,20 @@ const sitemap = unstable_cache(
     const payload = await getPayload({ config })
     const { docs } = await payload.find({
       collection: 'pages',
-      draft: false,
-      overrideAccess: false,
       depth: 0,
       pagination: false,
       select: {
-        _h_slugPath: true,
+        path: true,
         updatedAt: true,
       },
-      where: {
-        _status: { equals: 'published' },
-        isHome: { not_equals: true },
-      },
     })
-    const siteURL = payload.config.serverURL
 
-    const entries: MetadataRoute.Sitemap = [{ url: new URL('/', siteURL).href }]
+    const entries: MetadataRoute.Sitemap = []
     for (const page of docs) {
-      if (!page._h_slugPath) continue
+      if (!page.path) continue
 
       entries.push({
-        url: new URL(`/${page._h_slugPath}`, siteURL).href,
+        url: new URL(page.path, payload.config.serverURL).href,
         lastModified: page.updatedAt,
       })
     }

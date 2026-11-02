@@ -25,10 +25,8 @@ const findPageByPath = unstable_cache(
       context: { computeHierarchyPaths: true },
       // Explicitly select the native path so all ancestors are included in this beta.
       select: { _h_slugPath: true, isHome: true, title: true, meta: true, layout: true },
-      draft: false,
       limit: 1,
       pagination: false,
-      overrideAccess: false,
       where: isHome
         ? { isHome: { equals: true } }
         : { and: [{ slug: { equals: slug } }, { isHome: { not_equals: true } }] },

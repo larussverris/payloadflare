@@ -11,7 +11,7 @@ import { getPayload } from 'payload'
 export const getPreferences = unstable_cache(
   async () => {
     const payload = await getPayload({ config })
-    return payload.findGlobal({ slug: 'preferences', depth: 1, overrideAccess: false })
+    return payload.findGlobal({ slug: 'preferences', depth: 1 })
   },
   ['preferences'],
   { revalidate: 3600 },

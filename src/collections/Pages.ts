@@ -1,4 +1,5 @@
-import type { CollectionConfig, PayloadRequest } from 'payload'
+import type { CollectionConfig } from 'payload'
+import { getPagePreviewURL, pageHooks } from './Pages/hooks'
 import * as blocks from '@/blocks/config'
 import {
   MetaDescriptionField,
@@ -8,23 +9,13 @@ import {
   PreviewField,
 } from '@payloadcms/plugin-seo/fields'
 
-async function getPreviewURL(id: unknown, req: PayloadRequest) {
-  if (typeof id !== 'number' && typeof id !== 'string') return null
-  const page = await req.payload.findByID({
-    collection: 'pages',
-    id,
-    draft: true,
-    depth: 0,
-    context: { computeHierarchyPaths: true },
-    select: { _h_slugPath: true, isHome: true },
-    req,
-  })
-  const path = page.isHome ? '/' : page._h_slugPath ? `/${page._h_slugPath}` : null
-  return path ? `/preview?${new URLSearchParams({ path })}` : null
-}
-
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  // Page relationships need a label and public path for links, without loading the full page content.
+  defaultPopulate: {
+    title: true,
+    path: true,
+  },
   orderable: true,
   hierarchy: {
     parentFieldName: 'parent',
@@ -40,7 +31,7 @@ export const Pages: CollectionConfig = {
   admin: {
     livePreview: {
       openByDefault: true,
-      url: ({ data, req }) => getPreviewURL(data.id, req),
+      url: ({ data, req }) => getPagePreviewURL(data.id, req),
     },
     group: false,
     components: {
@@ -50,43 +41,20 @@ export const Pages: CollectionConfig = {
       },
     },
     useAsTitle: 'title',
-    defaultColumns: ['title', '_h_slugPath', '_status', 'updatedAt'],
+    defaultColumns: ['title', '_status', 'updatedAt', 'path'],
     listSearchableFields: ['title', 'slug'],
   },
   access: {
     read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
   },
-  hooks: {
-    beforeOperation: [({ args, operation, context }) => {
-      if (operation === 'read') {
-        const select = 'select' in args ? args.select as Record<string, unknown> | undefined : undefined
-        if (!select) context.computeHierarchyPaths = true
-        // Beta 4 does not auto-select native slug fields when computing hierarchy paths.
-        if (select?._h_slugPath === true || select?._h_titlePath === true) select.slug = true
-      }
-      return args
-    }],
-    beforeChange: [async ({ data, originalDoc, req }) => {
-      if ((data.isHome ?? originalDoc?.isHome) === true) data.parent = null
-      if (data.isHome === true) {
-        // Use the same request so nested writes share the current transaction.
-        await req.payload.update({
-          collection: 'pages',
-          where: {
-            and: [
-              { isHome: { equals: true } },
-              ...(originalDoc?.id ? [{ id: { not_equals: originalDoc.id } }] : []),
-            ],
-          },
-          data: { isHome: false },
-          overrideAccess: true,
-          req,
-        })
-      }
-      return data
-    }],
-  },
+  hooks: pageHooks,
   fields: [
+    {
+      name: 'path',
+      type: 'text',
+      virtual: true,
+      admin: { readOnly: true },
+    },
     {
       name: 'parent',
       type: 'relationship',
@@ -96,15 +64,14 @@ export const Pages: CollectionConfig = {
       label: 'Parent page',
       admin: {
         components: { Field: '/admin/components/PageSettingsDrawer#PageParentField' },
-        condition: data => data.isHome !== true,
+        condition: (data) => data.isHome !== true,
       },
-      filterOptions: ({ id }) => id ? { id: { not_equals: id } } : true,
+      filterOptions: ({ id }) => (id ? { id: { not_equals: id } } : true),
     },
     {
       name: 'title',
       type: 'text',
       label: 'Page name',
-      defaultValue: () => 'Untitled',
       required: true,
     },
     {
@@ -132,26 +99,7 @@ export const Pages: CollectionConfig = {
               name: 'pageURLPreview',
               type: 'ui',
               admin: {
-                components: {
-                  Field: {
-                    path: '/admin/components/PathPreview#PathPreview',
-                    clientProps: { pathField: '_h_slugPath' },
-                  },
-                },
-                condition: (data) => data.isHome !== true,
-              },
-            },
-            {
-              name: 'homepageURLPreview',
-              type: 'ui',
-              admin: {
-                condition: (data) => data.isHome === true,
-                components: {
-                  Field: {
-                    path: '/admin/components/PathPreview#PathPreview',
-                    clientProps: { pathname: '/' },
-                  },
-                },
+                components: { Field: '/admin/components/PathPreview#PathPreview' },
               },
             },
             {
@@ -161,7 +109,6 @@ export const Pages: CollectionConfig = {
               defaultValue: false,
               index: true,
               admin: {
-                description: 'Serve this page at /. Replaces the current homepage when saved.',
                 components: { Field: '/admin/components/PageHomepageField#PageHomepageField' },
               },
             },
@@ -177,9 +124,9 @@ export const Pages: CollectionConfig = {
               descriptionPath: 'meta.description',
               imagePath: 'meta.image',
             }),
-            MetaTitleField({ hasGenerateFn: false }),
-            MetaDescriptionField({ hasGenerateFn: false }),
-            MetaImageField({ relationTo: 'media', hasGenerateFn: false }),
+            MetaTitleField({}),
+            MetaDescriptionField({}),
+            MetaImageField({ relationTo: 'media' }),
             PreviewField({
               hasGenerateFn: true,
               titlePath: 'meta.title',

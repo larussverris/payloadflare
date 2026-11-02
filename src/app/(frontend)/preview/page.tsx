@@ -44,7 +44,6 @@ const findPageByPath = cache(async (pathname: string) => {
     user,
     limit: 1,
     pagination: false,
-    overrideAccess: false,
     where: isHome
       ? { isHome: { equals: true } }
       : { and: [{ slug: { equals: slug } }, { isHome: { not_equals: true } }] },
@@ -61,7 +60,6 @@ export default async function PreviewPage({ searchParams }: Props) {
   const notFoundPage = await payload.findGlobal({
     slug: 'not-found-page',
     draft: true,
-    overrideAccess: false,
     user,
   })
 

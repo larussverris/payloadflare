@@ -17,15 +17,6 @@
   text-decoration: underline;
 }
 
-#toggle-list-filters,
-#list-controls-where {
-  display: none !important;
-}
-
-body:has(.collection-list--pages) .default-list-view-tabs {
-  display: none !important;
-}
-
 .pages-sidebar {
   display: flex;
   flex-direction: column;

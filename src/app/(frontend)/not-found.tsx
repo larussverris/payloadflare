@@ -3,15 +3,13 @@ import config from '@payload-config'
 import { getPayload } from 'payload'
 
 import { renderBlocks } from '@/utilities/renderBlocks'
-import type { NotFoundPage } from '@/payload-types'
 
 const getNotFoundPage = unstable_cache(
   async () => {
     const payload = await getPayload({ config })
     return payload.findGlobal({
       slug: 'not-found-page',
-      draft: false,
-      overrideAccess: false,
+      disableErrors: true,
     })
   },
   ['not-found-page'],
@@ -19,12 +17,7 @@ const getNotFoundPage = unstable_cache(
 )
 
 export default async function NotFound() {
-  let page: NotFoundPage | undefined
-  try {
-    page = await getNotFoundPage()
-  } catch (error) {
-    console.error('Unable to load the 404 page content.', error)
-  }
+  const page = await getNotFoundPage()
 
   return renderBlocks(page?.layout)
 }

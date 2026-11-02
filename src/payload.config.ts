@@ -156,11 +156,7 @@ const config = buildConfig({
     seoPlugin({
       uploadsCollection: collections.Media.slug,
       collections: [], // Pages declares its SEO fields directly.
-      generateURL: ({ doc }) => {
-        if (doc.isHome) return '/'
-        if (doc._h_slugPath) return `/${doc._h_slugPath}`
-        return ''
-      },
+      generateURL: ({ doc }) => doc.path || '',
     }),
     formBuilderPlugin({
       formSubmissionOverrides: {

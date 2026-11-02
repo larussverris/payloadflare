@@ -9,7 +9,7 @@ import { PagesSidebarTree } from './PagesSidebarTree'
 export async function PagesSidebarTab({ payload, req, user }: SidebarTabServerProps) {
   if (!user) return null
   const result = await payload.find({
-    collection: 'pages', depth: 0, draft: true, limit: 250, overrideAccess: false,
+    collection: 'pages', depth: 0, draft: true, limit: 250,
     select: { isHome: true, title: true, parent: true, _status: true },
     sort: ['-isHome', 'title', 'id'], user: req?.user ?? user,
   })
