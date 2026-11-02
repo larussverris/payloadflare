@@ -1,3 +1,9 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates.
+ * Manage page content in Payload and block implementations in src/blocks/.
+ */
+
 import type { Metadata } from 'next'
 import { getPreferences } from '@/utilities/getPreferences'
 import { unstable_cache } from 'next/cache'
