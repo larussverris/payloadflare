@@ -20,7 +20,6 @@ export const NotFoundPage: GlobalConfig = {
     {
       name: 'layout',
       type: 'blocks',
-      admin: { initCollapsed: true },
       blocks: Object.values(blocks),
     },
   ],

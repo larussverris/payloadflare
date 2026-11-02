@@ -110,9 +110,6 @@ export const Pages: CollectionConfig = {
     {
       name: 'layout',
       type: 'blocks',
-      admin: {
-        initCollapsed: true,
-      },
       blocks: Object.values(blocks),
     },
     {

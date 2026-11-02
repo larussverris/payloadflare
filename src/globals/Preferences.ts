@@ -152,7 +152,6 @@ export const Preferences: GlobalConfig = {
             {
               type: 'collapsible',
               label: 'AI information (llms.txt)',
-              admin: { initCollapsed: true },
               fields: [
                 {
                   name: 'enableLlmsText',
