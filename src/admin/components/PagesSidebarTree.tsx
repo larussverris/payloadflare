@@ -1,17 +1,21 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates.
+ */
+
 'use client'
 
 import { useDndMonitor, type DragMoveEvent } from '@dnd-kit/core'
 import {
-  Button, ChevronIcon, DocumentIcon, DraggableSortable, DragHandleIcon, GearIcon, Link,
-  NavGroup, Popup, PopupList, toast, useDocumentDrawer, useDocumentEvents,
-  useDraggableSortable, useNav, usePreferences, useRouteTransition, useRouter,
+  Button, ChevronIcon, DocumentIcon, DraggableSortable, DragHandleIcon, Link,
+  NavGroup, Popup, PopupList, toast, useDocumentEvents,
+  useDraggableSortable, useNav, usePreferences, useRouteTransition, useRouter, useSidebarTabs,
 } from '@payloadcms/ui'
 import { usePathname, useRouter as useNextRouter } from 'next/navigation'
-import { generateKeyBetween, PREFERENCE_KEYS } from 'payload/shared'
-import { useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import { PREFERENCE_KEYS } from 'payload/shared'
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
 import { comparePages, type SidebarPage } from '@/admin/utilities/pageTree'
 import { getTreeDropTarget, type TreeDropTarget } from '@/admin/utilities/treeDrop'
-import { sidebarPageSettingsSlug } from './PageHeadingSettings'
 import { usePayloadSDK } from '../hooks/usePayloadSDK'
 import { HomeIcon } from '@/admin/icons/HomeIcon'
 
@@ -22,7 +26,13 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
 }) {
   const sdk = usePayloadSDK()
   const router = useRouter()
-  const { refresh } = useNextRouter()
+  const { refresh: refreshRoute } = useNextRouter()
+  const sidebarTabs = useSidebarTabs()
+  const reloadTabContent = sidebarTabs?.reloadTabContent
+  const refresh = useCallback(() => {
+    reloadTabContent?.('site-pages')
+    refreshRoute()
+  }, [reloadTabContent, refreshRoute])
   const pathname = usePathname()
   const { startRouteTransition } = useRouteTransition()
   const { setNavOpen } = useNav()
@@ -31,24 +41,18 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   const lastDocumentEvent = useRef(mostRecentUpdate)
   const [moving, setMoving] = useState(false)
   const [creatingPage, setCreatingPage] = useState(false)
-  const [createdPageID, setCreatedPageID] = useState<number>()
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
   const [dropTarget, setDropTarget] = useState<TreeDropTarget | null>(null)
   const [savedMoves, setSavedMoves] = useState<{
-    pages: SidebarPage[]; items: Record<string, Partial<SidebarPage>>
+    pages: SidebarPage[]; items: Record<string, Pick<SidebarPage, 'parentId'>>
   } | null>(null)
   const overrides = savedMoves?.pages === initialPages ? savedMoves.items : {}
   const pages = initialPages.map(page => ({ ...page, ...overrides[`page:${page.id}`] }))
   const pageByID = new Map(pages.map(page => [String(page.id), page]))
-  const homeID = pages.find(page => page.isHome)?.id
-  const homeKey = homeID == null ? undefined : `page:${homeID}`
   const currentPageRef = useRef<HTMLLIElement>(null)
   const pageRoute = `${adminRoute}/collections/pages/`
   const currentPageID = pathname.startsWith(pageRoute)
     ? decodeURIComponent(pathname.slice(pageRoute.length).split('/')[0]) : null
-  const [CreatePageDrawer, , { openDrawer: openCreatePage }] = useDocumentDrawer({
-    collectionSlug: 'pages', drawerSlug: sidebarPageSettingsSlug('create'), id: createdPageID,
-  })
 
   useEffect(() => {
     currentPageRef.current?.scrollIntoView({ block: 'nearest' })
@@ -71,8 +75,9 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
     setCreatingPage(true)
     try {
       const page = await sdk.create({ collection: 'pages', draft: true, data: { title: 'Untitled', slug: '' } })
-      setCreatedPageID(page.id)
-      openCreatePage()
+      setNavOpen(false, true)
+      await setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: 'site-pages' }).catch(() => undefined)
+      startRouteTransition(() => { void router.push(`${pageRoute}${page.id}`) })
       refresh()
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Could not create page.')
@@ -86,32 +91,13 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
     setMoving(true)
     const toastID = toast.loading('Saving move…')
     try {
-      const parentId = target.placement === 'inside' ? (destination?.id ?? null) : (destination?.parentId ?? null)
-      const { docs } = await sdk.find({
-        collection: 'pages', draft: true, depth: 0, limit: 0,
-        where: { parent: parentId == null ? { exists: false } : { equals: parentId } },
-        select: { _order: true, isHome: true, _status: true },
-      })
-      const siblings = docs.filter(page => String(page.id) !== String(source.id)).sort(comparePages)
-      // Let Payload initialize any older page's missing order key through its normal update hooks.
-      for (const page of siblings) {
-        if (!page._order) {
-          const saved = await sdk.update({ collection: 'pages', id: page.id, data: {}, draft: page._status === 'draft' })
-          page._order = saved._order
-        }
-      }
-      siblings.sort(comparePages)
-      let index = !destination ? siblings.length : target.placement === 'inside' ? 0
-        : siblings.findIndex(page => String(page.id) === String(destination.id))
-      if (index < 0) throw new Error('The destination changed. Refresh and try again.')
-      if (target.placement === 'after' && destination) index++
-      if (siblings[0]?.isHome) index = Math.max(1, index)
-      const _order = generateKeyBetween(siblings[index - 1]?._order ?? null, siblings[index]?._order ?? null)
+      const parentId = destination?.id ?? null
       const saved = await sdk.update({
         collection: 'pages', id: Number(source.id), draft: source._status === 'draft',
-        data: { parent: parentId == null ? null : Number(parentId), _order },
+        data: { parent: parentId == null ? null : Number(parentId) },
       })
-      const items = { ...overrides, [id]: { _order: saved._order, parentId } }
+      const savedParentId = typeof saved.parent === 'object' ? saved.parent?.id : saved.parent
+      const items = { ...overrides, [id]: { parentId: savedParentId ?? null } }
       setSavedMoves({ pages: initialPages, items })
       setCollapsed(previous => {
         const next = new Set(previous)
@@ -162,10 +148,9 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
         const href = `${pageRoute}${encodeURIComponent(key)}`
         const isCurrent = key === currentPageID
         const hasChildren = byParent.has(key)
-        const placement = dropTarget?.id === dragID ? dropTarget.placement : undefined
         return (
           <li className="pages-sidebar__item" key={key} ref={isCurrent ? currentPageRef : undefined}>
-            <TreeDragRow id={dragID} disabled={moving || page.isHome} dropInside={placement === 'inside'}>
+            <TreeDragRow id={dragID} disabled={moving || page.isHome} dropInside={dropTarget?.id === dragID}>
               {({ attributes, listeners }) => <>
                 {!page.isHome && <button {...attributes} {...listeners} aria-label={`Move ${page.title}`}
                   className="pages-sidebar__drag-handle" disabled={moving} type="button"><DragHandleIcon size={16} /></button>}
@@ -179,19 +164,16 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
                     </span>
                     <span className="nav__link-label">{page.title}</span>
                   </Link>
-                  {isCurrent ? <button type="button" aria-label={`Settings for ${page.title}`}
-                    className="pages-sidebar__folder-settings"
-                    onClick={() => window.dispatchEvent(new CustomEvent('page-settings:open', { detail: key }))}><GearIcon size={16} /></button>
-                    : <TreeSettingsDrawer id={page.id} title={page.title} />}
+
                 </div>
-                {hasChildren && <button type="button" className="pages-sidebar__expand"
+                {hasChildren && <Button type="button" buttonStyle="ghost" className="pages-sidebar__expand"
+                  icon={<ChevronIcon direction={children ? 'down' : 'right'} size={24} />} round margin={false}
                   aria-label={`${children ? 'Collapse' : 'Expand'} ${page.title}`} aria-expanded={children !== null}
-                  onClick={() => toggle(key)}><ChevronIcon direction={children ? 'down' : 'right'} size={16} /></button>}
+                  onClick={() => toggle(key)} />}
               </>}
             </TreeDragRow>
             {children && children.length > 0 && renderBranch(children, depth + 1)}
-            {placement && placement !== 'inside' && <span aria-hidden="true" className="pages-sidebar__drop-line"
-              data-placement={placement} style={{ insetInlineStart: `calc(var(--spacer-3) + ${depth * 16 + 8}px)` }} />}
+
           </li>
         )
       })}
@@ -212,16 +194,15 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
             type="button" disabled={creatingPage} onClick={() => void createPage()} />
         </div>
       </div>
-      <CreatePageDrawer redirectAfterCreate={false} onSave={() => refresh()} />
       <NavGroup label="Pages" isOpen>
         <DraggableSortable className="pages-sidebar__sortable" ids={visibleIDs}
           sortingStrategy={() => null} renderDragOverlay={() => null}
           onDragEnd={({ event }) => {
-            const target = getTreeDropTarget(event, visibleIDs, homeKey)
+            const target = getTreeDropTarget(event, visibleIDs, pages)
             if (target) void saveMove(String(event.active.id), target)
           }}>
-          <TreeDragMonitor ids={visibleIDs} homeKey={homeKey} onChange={target => {
-            setDropTarget(previous => previous?.id === target?.id && previous?.placement === target?.placement ? previous : target)
+          <TreeDragMonitor ids={visibleIDs} pages={pages} onChange={target => {
+            setDropTarget(previous => previous?.id === target?.id ? previous : target)
           }} />
           <TreeDragRow id="root" dropInside={dropTarget?.id === 'root'}>{() => <div aria-hidden="true" className="pages-sidebar__root-drop" />}</TreeDragRow>
           {renderBranch(tree, 0)}
@@ -240,19 +221,6 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   )
 }
 
-function TreeSettingsDrawer({ id, title }: { id: number | string; title: string }) {
-  const { refresh } = useNextRouter()
-  const [DocumentDrawer, DocumentDrawerToggler] = useDocumentDrawer({
-    collectionSlug: 'pages', drawerSlug: sidebarPageSettingsSlug(id), id: Number(id),
-  })
-  return <>
-    <DocumentDrawerToggler aria-label={`Settings for ${title}`} buttonStyle="link" className="pages-sidebar__folder-settings">
-      <span aria-hidden="true"><GearIcon size={16} /></span>
-    </DocumentDrawerToggler>
-    <DocumentDrawer onDelete={() => refresh()} />
-  </>
-}
-
 type DragRowState = Pick<ReturnType<typeof useDraggableSortable>, 'attributes' | 'listeners'>
 function TreeDragRow({ id, disabled, dropInside, children }: {
   id: string; disabled?: boolean; dropInside?: boolean; children: (state: DragRowState) => ReactNode
@@ -263,10 +231,10 @@ function TreeDragRow({ id, disabled, dropInside, children }: {
     {children({ attributes, listeners })}
   </div>
 }
-function TreeDragMonitor({ ids, homeKey, onChange }: {
-  ids: string[]; homeKey?: string; onChange: (target: TreeDropTarget | null) => void
+function TreeDragMonitor({ ids, pages, onChange }: {
+  ids: string[]; pages: SidebarPage[]; onChange: (target: TreeDropTarget | null) => void
 }) {
-  const update = (event: DragMoveEvent) => onChange(getTreeDropTarget(event, ids, homeKey))
+  const update = (event: DragMoveEvent) => onChange(getTreeDropTarget(event, ids, pages))
   useDndMonitor({ onDragMove: update, onDragOver: update, onDragEnd: () => onChange(null), onDragCancel: () => onChange(null) })
   return null
 }

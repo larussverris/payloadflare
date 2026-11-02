@@ -102,11 +102,17 @@ export const Pages: CollectionConfig = {
       filterOptions: ({ id }) => id ? { id: { not_equals: id } } : true,
     },
     {
+      name: 'title',
+      type: 'text',
+      label: 'Page name',
+      defaultValue: () => 'Untitled',
+      required: true,
+    },
+    {
       name: 'layout',
       type: 'blocks',
       admin: {
         initCollapsed: true,
-        components: { Field: '/admin/components/PageSettingsDrawer#PageLayoutField' },
       },
       blocks: Object.values(blocks),
     },
@@ -120,13 +126,6 @@ export const Pages: CollectionConfig = {
           type: 'group',
           label: false,
           fields: [
-            {
-              name: 'title',
-              type: 'text',
-              label: 'Page name',
-              defaultValue: () => 'Untitled',
-              required: true,
-            },
             {
               name: 'slug',
               type: 'slug',

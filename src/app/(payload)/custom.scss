@@ -99,7 +99,7 @@ body:has(.collection-list--pages) .default-list-view-tabs {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-icon-tertiary);
+  color: var(--color-icon-primary);
   cursor: grab;
   touch-action: none;
   opacity: 0;
@@ -127,48 +127,7 @@ body:has(.collection-list--pages) .default-list-view-tabs {
 }
 
 .pages-sidebar__page-link {
-  padding-inline-end: 64px;
-}
-
-.pages-sidebar__folder-row:has(.pages-sidebar__folder-settings:hover) .nav__link:not(.nav__link--selected)::before {
-  background: var(--color-bg-secondary);
-}
-
-.pages-sidebar__folder-settings {
-  margin: 0;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  opacity: 0;
-  position: absolute;
-  inset-inline-end: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--color-icon-tertiary);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-  border-radius: var(--button-radius);
-}
-
-.pages-sidebar__folder-row:hover .pages-sidebar__folder-settings,
-.pages-sidebar__folder-row:focus-within .pages-sidebar__folder-settings {
-  opacity: 1;
-}
-
-.pages-sidebar__folder-settings > span {
-  display: flex;
-}
-
-.pages-sidebar__folder-settings:hover {
-  color: var(--color-text);
-  background: var(--color-bg-secondary);
-}
-
-.pages-sidebar__folder-settings svg {
-  height: 14px;
-  width: 14px;
+  padding-inline-end: 40px;
 }
 
 .pages-sidebar__hint {
@@ -195,36 +154,9 @@ body:has(.collection-list--pages) .default-list-view-tabs {
   inset-inline-end: 16px;
   inset-block-start: 50%;
   transform: translateY(-50%);
-  display: flex;
-  padding: 2px;
-  border: 0;
-  background: transparent;
-  color: var(--color-icon-secondary);
-  cursor: pointer;
 }
 .pages-sidebar__folder-row[data-drop-inside] {
   outline: 1px solid var(--color-border-selected);
   outline-offset: -1px;
   border-radius: var(--button-radius);
-}
-.pages-sidebar__drop-line {
-  position: absolute;
-  inset-inline-end: 0;
-  height: 1px;
-  background: var(--color-border-selected);
-  pointer-events: none;
-  z-index: 4;
-  &[data-placement='before'] { top: 0; }
-  &[data-placement='after'] { bottom: 0; }
-  &::before {
-    content: '';
-    position: absolute;
-    inset-inline-start: -3px;
-    top: -2px;
-    width: 5px;
-    height: 5px;
-    border: 1px solid var(--color-border-selected);
-    border-radius: 50%;
-    background: var(--color-bg);
-  }
 }

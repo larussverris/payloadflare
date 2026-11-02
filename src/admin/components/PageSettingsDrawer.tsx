@@ -1,40 +1,32 @@
+/**
+ * Template-maintained file. Users and AI agents: avoid site-specific edits here
+ * to reduce conflicts when merging upstream template updates.
+ */
+
 'use client'
 
-import type { BlocksFieldClientProps, ClientField, RelationshipFieldClientProps, RowFieldClientProps } from 'payload'
+import type { ClientField, RelationshipFieldClientProps, RowFieldClientProps } from 'payload'
 import {
   Button,
-  BlocksField,
   ChevronIcon,
-  DocumentControls,
   Drawer,
   DrawerContentContainer,
   RenderFields,
   RelationshipField,
   useConfig,
   useDocumentInfo,
-  useDocumentDrawerContext,
   useFormFields,
   useModal,
   useTranslation,
 } from '@payloadcms/ui'
 import { createContext, useContext, useEffect } from 'react'
 
-import { isSidebarPageSettings, pageSettingsSlug } from './PageHeadingSettings'
+import { pageSettingsSlug } from './PageHeadingSettings'
 
 const InPageSettings = createContext(false)
 
 function PageParentField(props: RelationshipFieldClientProps) {
   return useContext(InPageSettings) ? <RelationshipField {...props} /> : null
-}
-
-function PageLayoutField(props: BlocksFieldClientProps) {
-  const { drawerSlug } = useDocumentDrawerContext()
-  return isSidebarPageSettings(drawerSlug) ? null : <BlocksField {...props} />
-}
-
-function PageSettingsDrawer(props: RowFieldClientProps) {
-  const { drawerSlug } = useDocumentDrawerContext()
-  return isSidebarPageSettings(drawerSlug) ? <PageSettingsFields {...props} /> : <PageSettingsModal {...props} />
 }
 
 function PageSettingsFields(props: RowFieldClientProps) {
@@ -45,7 +37,7 @@ function PageSettingsFields(props: RowFieldClientProps) {
     parent?.type === 'relationship' && field.type === 'group' && !('name' in field)
       ? {
         ...field,
-        fields: [field.fields[0], parent, ...field.fields.slice(1)],
+        fields: [parent, ...field.fields],
       }
       : field,
   )
@@ -63,30 +55,15 @@ function PageSettingsFields(props: RowFieldClientProps) {
   )
 }
 
-function PageSettingsModal(props: RowFieldClientProps) {
-  const {
-    id,
-    apiURL,
-    collectionSlug,
-    data,
-    disableActions,
-    disableCreate,
-    docPermissions,
-    hasPublishPermission,
-    hasSavePermission,
-    isEditing,
-    isTrashed,
-    redirectAfterDelete,
-    redirectAfterDuplicate,
-    redirectAfterRestore,
-  } = useDocumentInfo()
+function PageSettingsDrawer(props: RowFieldClientProps) {
+  const { id } = useDocumentInfo()
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()
   const slug = pageSettingsSlug(id)
   const hasSettingsErrors = useFormFields(([fields]) =>
     Object.entries(fields).some(
       ([path, field]) =>
-        (['title', 'slug', 'parent', 'isHome'].includes(path) || path.startsWith('meta.')) &&
+        (['slug', 'parent', 'isHome'].includes(path) || path.startsWith('meta.')) &&
         field.valid === false,
     ),
   )
@@ -95,13 +72,7 @@ function PageSettingsModal(props: RowFieldClientProps) {
     if (hasSettingsErrors) openModal(slug)
   }, [hasSettingsErrors, openModal, slug])
 
-  useEffect(() => {
-    const openSettings = (event: Event) => {
-      if ((event as CustomEvent<string>).detail === String(id)) openModal(slug)
-    }
-    window.addEventListener('page-settings:open', openSettings)
-    return () => window.removeEventListener('page-settings:open', openSettings)
-  }, [id, openModal, slug])
+
 
   return (
     <Drawer
@@ -116,27 +87,6 @@ function PageSettingsModal(props: RowFieldClientProps) {
             onClick={() => closeModal(slug)}
           />
           <h2 className="drawer__header__title">Page settings</h2>
-          <div className="drawer__header__actions">
-            <DocumentControls
-              apiURL={apiURL ?? ''}
-              data={data}
-              disableActions={disableActions || isTrashed}
-              disableCreate={disableCreate}
-              hasPublishPermission={hasPublishPermission}
-              hasSavePermission={hasSavePermission}
-              id={id}
-              isEditing={isEditing}
-              isInDrawer
-              isTrashed={isTrashed}
-              permissions={docPermissions ?? null}
-              readOnlyForIncomingUser={props.readOnly}
-              redirectAfterDelete={redirectAfterDelete}
-              redirectAfterDuplicate={redirectAfterDuplicate}
-              redirectAfterRestore={redirectAfterRestore}
-              slug={collectionSlug ?? 'pages'}
-              variant="drawerHeaderActions"
-            />
-          </div>
         </div>
       }
     >
@@ -147,4 +97,4 @@ function PageSettingsModal(props: RowFieldClientProps) {
   )
 }
 
-export { PageParentField, PageLayoutField, PageSettingsDrawer }
+export { PageParentField, PageSettingsDrawer }

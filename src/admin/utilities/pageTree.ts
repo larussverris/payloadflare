@@ -2,21 +2,15 @@ type SidebarPage = {
   id: number | string
   title: string
   parentId?: number | string | null
-  _order?: string | null
   isHome?: boolean
   _status?: 'draft' | 'published' | null
 }
 
-type OrderedPage = { id: number | string; _order?: string | null; isHome?: boolean | null }
+const titleCollator = new Intl.Collator('en', { numeric: true, sensitivity: 'base' })
 
-export function comparePages(a: OrderedPage, b: OrderedPage) {
+export function comparePages(a: SidebarPage, b: SidebarPage) {
   if (Boolean(a.isHome) !== Boolean(b.isHome)) return a.isHome ? -1 : 1
-  if (a._order !== b._order) {
-    if (!a._order) return 1
-    if (!b._order) return -1
-    return a._order < b._order ? -1 : 1
-  }
-  return String(a.id).localeCompare(String(b.id), undefined, { numeric: true })
+  return titleCollator.compare(a.title, b.title) || titleCollator.compare(String(a.id), String(b.id))
 }
 
 export type { SidebarPage }
