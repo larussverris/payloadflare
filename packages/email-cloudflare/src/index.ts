@@ -78,6 +78,10 @@ const cloudflareEmailAdapter = (args: EmailAdapterArgs): CloudflareEmailAdapter 
 
     let from: EmailMessageBuilder['from']
 
+    if (Array.isArray(msg.from)) {
+      throw new Error('Cloudflare email requires a single sender.')
+    }
+
     if (msg.from) {
       from = toCloudflareAddress(msg.from)
     } else {

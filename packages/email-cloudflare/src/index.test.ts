@@ -133,6 +133,20 @@ describe('cloudflareEmailAdapter', () => {
     )
   })
 
+  it.each([
+    { from: [] },
+    { from: ['sender@example.com'] },
+    { from: ['one@example.com', 'two@example.com'] },
+  ])('rejects sender arrays before sending', async ({ from }) => {
+    const { adapter, send } = createAdapter()
+
+    await expect(
+      adapter.sendEmail({ from, subject: 'Hello', to: 'recipient@example.com' }),
+    ).rejects.toThrow('Cloudflare email requires a single sender.')
+
+    expect(send).not.toHaveBeenCalled()
+  })
+
   it('converts HTML Buffers to UTF-8 strings', async () => {
     const { adapter, send } = createAdapter()
 
