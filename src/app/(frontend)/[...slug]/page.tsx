@@ -5,62 +5,63 @@
  */
 
 import type { Metadata } from 'next'
-import { getPreferences } from '@/utilities/getPreferences'
 import { unstable_cache } from 'next/cache'
+import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import config from '@payload-config'
-
+import { getPreferences } from '@/utilities/getPreferences'
 import { renderBlocks } from '@/utilities/renderBlocks'
 
-type Props = { params: Promise<{ slug?: string[] }> }
+type Props = { params: Promise<{ slug: string[] }> }
 
-// Public routes always read published content, regardless of browser cookies.
-const findPageByPath = unstable_cache(
-  async (segments: string[]) => {
-    const pathname = segments.join('/')
-    const slug = segments.at(-1)
-    const isHome = segments.length === 0
+const queryPage = unstable_cache(
+  async (pathname: string, draft: boolean) => {
+    const slug = pathname.split('/').at(-1)!
 
     const payload = await getPayload({ config })
-    const {
-      docs: [page],
-    } = await payload.find({
+    const { docs } = await payload.find({
       collection: 'pages',
+      overrideAccess: draft,
+      draft,
       depth: 2,
       context: { computeHierarchyPaths: true },
       // Explicitly select the native path so all ancestors are included in this beta.
-      select: { _h_slugPath: true, isHome: true, title: true, meta: true, layout: true },
-      limit: 1,
+      select: {
+        _h_slugPath: true,
+        // This beta needs status to compute draft ancestor paths correctly.
+        _status: true,
+        slug: true,
+        title: true,
+        meta: true,
+        layout: true,
+      },
       pagination: false,
-      where: isHome
-        ? { isHome: { equals: true } }
-        : { and: [{ slug: { equals: slug } }, { isHome: { not_equals: true } }] },
+      where: { slug: { equals: slug } },
     })
-    if (isHome) return page ?? null
-    return page?._h_slugPath === pathname ? page : null
+    return docs.find((page) => page._h_slugPath === pathname) ?? null
   },
   undefined,
-  {
-    revalidate: 3600,
-  },
+  { revalidate: 3600 },
 )
 
 export default async function Page({ params }: Props) {
-  const { slug = [] } = await params
-  const page = await findPageByPath(slug)
+  const { slug } = await params
+  const pathname = slug.join('/')
+  const { isEnabled } = await draftMode()
+  const page = await queryPage(pathname, isEnabled)
   if (!page) notFound()
 
   return renderBlocks(page.layout)
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug = [] } = await params
-  const page = await findPageByPath(slug)
-  if (!page) notFound()
+  const { slug } = await params
+  const page = await queryPage(slug.join('/'), false)
+  if (!page) return {}
 
   const settings = await getPreferences()
-  const path = `/${slug.join('/')}`
+  const path = page.slug === 'home' ? '/' : `/${page._h_slugPath}`
   const title = page.meta?.title || page.title
 
   const description = page.meta?.description || settings.meta?.description || undefined

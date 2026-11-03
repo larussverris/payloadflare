@@ -13,7 +13,7 @@ export const NotFoundPage: GlobalConfig = {
     group: false,
     livePreview: {
       openByDefault: true,
-      url: '/preview?path=/not-found-preview',
+      url: () => `/preview?${new URLSearchParams({ path: `/${crypto.randomUUID()}` })}`,
     },
   },
   fields: [

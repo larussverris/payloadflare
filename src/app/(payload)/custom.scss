@@ -26,6 +26,10 @@
   border-top: 0;
 }
 
+.pages-sidebar .nav-group__toggle {
+  color: var(--color-text);
+}
+
 .pages-sidebar__actions {
   align-items: center;
   display: flex;
@@ -35,6 +39,7 @@
 
 .pages-sidebar__actions .btn {
   margin: 0;
+  color: var(--color-text-secondary);
 }
 
 .pages-sidebar__actions svg {

@@ -1,5 +1,4 @@
-import type { CollectionConfig } from 'payload'
-import { getPagePreviewURL, pageHooks } from './Pages/hooks'
+import type { CollectionConfig, Where } from 'payload'
 import * as blocks from '@/blocks/config'
 import {
   MetaDescriptionField,
@@ -11,20 +10,14 @@ import {
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
-  // Page relationships need a label and public path for links, without loading the full page content.
+  // Page relationships need a label and native hierarchy path, without full page content.
   defaultPopulate: {
     title: true,
-    path: true,
-    isHome: true,
     _h_slugPath: true,
     slug: true,
     parent: true,
   },
-  select: ({ operation, req }) => {
-    if (operation === 'read') req.context.computeHierarchyPaths = true
-    return undefined
-  },
-  orderable: true,
+  defaultSort: 'title',
   hierarchy: {
     parentFieldName: 'parent',
     slugField: 'slug',
@@ -37,11 +30,15 @@ export const Pages: CollectionConfig = {
   },
   versions: { drafts: { autosave: { interval: 200 } } },
   admin: {
+    group: false,
     livePreview: {
       openByDefault: true,
-      url: ({ data, req }) => getPagePreviewURL(data.id, req),
+      url: ({ data }) => {
+        if (!data._h_slugPath) return null
+        const path = `/${data._h_slugPath}`
+        return `/preview?${new URLSearchParams({ path })}`
+      },
     },
-    group: false,
     components: {
       beforeList: ['/admin/components/PagesListPreferences#PagesListPreferences'],
       edit: {
@@ -49,20 +46,13 @@ export const Pages: CollectionConfig = {
       },
     },
     useAsTitle: 'title',
-    defaultColumns: ['title', '_status', 'updatedAt', 'path'],
+    defaultColumns: ['title', '_h_slugPath', '_status', 'updatedAt'],
     listSearchableFields: ['title', 'slug'],
   },
   access: {
     read: ({ req }) => (req.user ? true : { _status: { equals: 'published' } }),
   },
-  hooks: pageHooks,
   fields: [
-    {
-      name: 'path',
-      type: 'text',
-      virtual: true,
-      admin: { readOnly: true },
-    },
     {
       name: 'parent',
       type: 'relationship',
@@ -71,10 +61,15 @@ export const Pages: CollectionConfig = {
       index: true,
       label: 'Parent page',
       admin: {
+        condition: (data) => data.slug !== 'home',
         components: { Field: '/admin/components/PageSettingsDrawer#PageParentField' },
-        condition: (data) => data.isHome !== true,
       },
-      filterOptions: ({ id }) => (id ? { id: { not_equals: id } } : true),
+      filterOptions: ({ id }): Where => ({
+        and: [
+          { slug: { not_equals: 'home' } },
+          ...(id == null ? [] : [{ id: { not_equals: id } }]),
+        ],
+      }),
     },
     {
       name: 'title',
@@ -101,17 +96,7 @@ export const Pages: CollectionConfig = {
               name: 'slug',
               type: 'slug',
               useAsSlug: 'title',
-              admin: { position: 'main', condition: (data) => data.isHome !== true },
-            },
-            {
-              name: 'isHome',
-              type: 'checkbox',
-              label: 'Homepage',
-              defaultValue: false,
-              index: true,
-              admin: {
-                components: { Field: '/admin/components/PageHomepageField#PageHomepageField' },
-              },
+              admin: { position: 'main', condition: (data) => data.slug !== 'home' },
             },
           ],
         },

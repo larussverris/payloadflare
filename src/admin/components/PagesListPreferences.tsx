@@ -7,13 +7,14 @@ export function PagesListPreferences({
   searchParams,
 }: BeforeListServerProps) {
   const sort = searchParams?.sort ?? listPreferences?.sort
-  if (!['path', '-path', '_h_slugPath', '-_h_slugPath'].includes(String(sort))) return null
+  if (!['path', '-path', '_h_slugPath', '-_h_slugPath', '_order', '-_order'].includes(String(sort)))
+    return null
 
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(searchParams ?? {})) {
     if (typeof value === 'string') params.append(key, value)
     else if (Array.isArray(value)) value.forEach((item) => params.append(key, item))
   }
-  params.set('sort', '_order')
+  params.set('sort', 'title')
   redirect(`${payload.config.routes.admin}/collections/pages?${params}`)
 }

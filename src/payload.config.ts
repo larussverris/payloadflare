@@ -2,12 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { sqliteD1Adapter } from '@payloadcms/db-d1-sqlite'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import {
-  buildConfig,
-  type CollectionConfig,
-  type GlobalConfig,
-  type Config,
-} from 'payload'
+import { buildConfig, type CollectionConfig, type GlobalConfig, type Config } from 'payload'
 import { revalidatePath } from 'next/cache'
 import { fileURLToPath } from 'url'
 import { CloudflareContext, getCloudflareContext } from '@opennextjs/cloudflare'
@@ -158,7 +153,8 @@ const config = buildConfig({
     seoPlugin({
       uploadsCollection: collections.Media.slug,
       collections: [], // Pages declares its SEO fields directly.
-      generateURL: ({ doc }) => doc.path || '',
+      generateURL: ({ doc }) =>
+        doc._h_slugPath ? `/${doc._h_slugPath.replace(/^home$/, '')}` : '',
     }),
     formBuilderPlugin({
       formSubmissionOverrides: {

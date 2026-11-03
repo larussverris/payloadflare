@@ -132,13 +132,31 @@ pnpm deploy
 
 ## Pages and live preview
 
-Create a page and use its page settings to make it the homepage at `/`.
-The homepage has no parent; selecting another page as homepage replaces the current
-one. The template does not seed a homepage through migrations.
+The local `@payloadflare/path-preview` plugin adds the saved URL after the slug
+field. Configure its display replacement in `src/payload.config.ts`:
 
-Create other pages with a single slug segment, such as `team`, and optionally
-choose a parent to produce a URL such as `/about/team`. One optional catch-all
-route renders Home and regular pages. Avoid existing routes such as `admin`, `api`, and `preview`. Missing and unpublished pages return 404 to public visitors.
+```ts
+pathPreview({ collections: ['pages'], replace: [/^\/home$/, '/'] })
+```
+
+It reads the native `_h_slugPath` and opens the URL in a new tab. The replacement
+only affects the displayed link, leaving the stored slug unchanged.
+
+The page with slug `home` serves `/`. Its slug control is hidden in Page settings,
+and the sidebar marks it with a house icon. There is no homepage-switching button.
+
+Other pages use their native Payload `_h_slugPath`, such as `/about/team`.
+One `[...slug]` route renders all pages using their native hierarchy paths.
+An early `/` → `/home` rewrite serves the homepage without changing the browser URL.
+There is no duplicate virtual `path` field. Missing and
+unpublished pages return 404 to public visitors. Reserve `admin`, `api`, and
+`preview` for application routes.
+
+Existing installations should migrate their former homepage to slug `home`, with
+no parent or children, and resolve any existing `home` slug conflict first. Include
+saved versions in that conversion. No homepage relationship in Preferences or
+homepage-switching migration is needed. This template has no initial migration
+baseline; generate schema migrations against your installation's own history.
 
 The editable 404 global is shown as a Payload UI card below the Pages list and pagination. Unexpected errors
 use Next.js’s built-in error page.
@@ -153,19 +171,25 @@ in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend re
 in `index.tsx`. Use named component exports and import implementations from the
 block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
 
-Preview uses dedicated, authenticated URLs under `/preview`. The admin's Preview
-button opens a standalone draft preview; Live Preview uses the same routes inside
-its iframe and refreshes after autosaves. Pages preview at `/preview/<page-path>`,
-and the homepage at `/preview`. Any unmatched preview path renders the 404 global's
-draft; its admin preview link uses `/preview/not-found-preview` as a missing path.
+The `/preview` entry handler verifies the Payload session, enables Next.js Draft
+Mode, and redirects to the requested local path. Normal page routing validates the
+hierarchy path and renders the editable 404 for missing pages. The Pages collection
+builds preview URLs from the saved hierarchy path. The 404
+global uses a generated missing URL through the same preview entry handler.
 
-Every preview read verifies the Payload session and reads drafts without the public
-cache. Preview responses are dynamic and marked `noindex`. Public URLs always read
-published content, even for signed-in editors or browsers with an old Draft Mode
-cookie. Preview does not set a Draft Mode cookie and needs no exit-preview action.
+Regular visitors keep the published page cache. A browser with a valid Draft Mode
+cookie reads drafts at those same URLs, bypasses the published cache,
+and refreshes after admin autosaves. Titles, descriptions,
+sharing images, and site metadata always use published content, including during
+preview. Draft-only pages inherit site metadata until published. A Payload login is
+required only when entering preview; the valid Draft Mode cookie authorizes later
+draft reads and live-preview refreshes.
+Preview adds no visible banner or controls. A `POST /preview` request clears the
+cookie; reloading then returns to published content. The cookie applies to public paths and lasts until
+the browser session ends, preview is exited, or the site is rebuilt.
 
-Reserve the `/preview` prefix for this feature. Preview links follow saved slugs
-and hierarchy; new documents must be saved before previewing. Set
+Reserve the `/preview` prefix for the entry handler. Preview links follow saved
+slugs and hierarchy; new documents must be saved before previewing. Set
 `NEXT_PUBLIC_SERVER_URL` to the origin used for the app.
 
 ## Site revalidation
@@ -187,7 +211,7 @@ version pinned in the workspace catalog.
 The frontend renders Next.js metadata, canonical URLs, Open Graph, and Twitter
 sharing tags from these fields, falling back to Site Settings for the description
 and sharing image. The default homepage title is the site name; other pages fall
-back to their page title. Preview responses include a noindex directive.
+back to their page title.
 
 ## Optimizations
 
@@ -228,8 +252,8 @@ Set the required `MAX_UPLOAD_SIZE` environment variable in bytes (for example,
 Pages nest under other pages using Payload's native hierarchy and parent selector.
 Each parent is a real page: `about` serves `/about`, and its child `team` serves
 `/about/team`. Payload computes `_h_slugPath` on read; moving or renaming a parent
-updates descendant URLs without rewriting those pages. The page marked as the
-homepage serves `/`.
+updates descendant URLs without rewriting those pages. The page with slug `home`
+serves `/` through the early rewrite to `/home` and the shared catch-all route.
 
 The separate folder model is no longer used. Existing folder records and page-folder
 assignments are not converted; no data migration is included.

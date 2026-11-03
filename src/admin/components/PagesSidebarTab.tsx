@@ -10,15 +10,15 @@ export async function PagesSidebarTab({ payload, req, user }: SidebarTabServerPr
   if (!user) return null
   const result = await payload.find({
     collection: 'pages', depth: 0, draft: true, limit: 250,
-    select: { isHome: true, title: true, parent: true, _status: true },
-    sort: ['-isHome', 'title', 'id'], user: req?.user ?? user,
+    select: { slug: true, title: true, parent: true, _status: true },
+    sort: ['title', 'id'], user: req?.user ?? user,
   })
   return <PagesSidebarTree
     adminRoute={payload.config.routes.admin}
     hasMore={result.hasNextPage}
     pages={result.docs.map(page => ({
       id: page.id, title: page.title || String(page.id),
-      isHome: page.isHome === true, _status: page._status,
+      isHome: page.slug === 'home', _status: page._status,
       parentId: typeof page.parent === 'object' ? page.parent?.id : page.parent,
     }))}
   />

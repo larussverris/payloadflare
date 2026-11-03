@@ -63,7 +63,7 @@ function PageSettingsDrawer(props: RowFieldClientProps) {
   const hasSettingsErrors = useFormFields(([fields]) =>
     Object.entries(fields).some(
       ([path, field]) =>
-        (['slug', 'parent', 'isHome'].includes(path) || path.startsWith('meta.')) &&
+        (['slug', 'parent'].includes(path) || path.startsWith('meta.')) &&
         field.valid === false,
     ),
   )

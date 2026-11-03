@@ -3,12 +3,22 @@ import { getPreferences } from '@/utilities/getPreferences'
 import React from 'react'
 import type { Metadata } from 'next'
 import config from '@payload-config'
+import { draftMode } from 'next/headers'
+import { RefreshRouteOnSave } from '@payloadcms/live-preview-react'
+import { refresh } from 'next/cache'
 
 import './globals.css'
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
   const { pageLanguage } = await getPreferences()
+  const { isEnabled } = await draftMode()
+  const { serverURL } = await config
+
+  async function refreshPreview() {
+    'use server'
+    if ((await draftMode()).isEnabled) refresh()
+  }
 
   return (
     <html lang={pageLanguage || 'en'}>
@@ -16,6 +26,7 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <OrganizationSchema />
       </head>
       <body>
+        {isEnabled && <RefreshRouteOnSave refresh={refreshPreview} serverURL={serverURL!} />}
         <main>{children}</main>
       </body>
     </html>

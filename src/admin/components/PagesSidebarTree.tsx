@@ -59,7 +59,7 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
   useEffect(() => {
     if (mostRecentUpdate === lastDocumentEvent.current) return
     lastDocumentEvent.current = mostRecentUpdate
-    if (mostRecentUpdate?.entitySlug === 'pages') refresh()
+    if (['pages', 'preferences'].includes(mostRecentUpdate?.entitySlug ?? '')) refresh()
   }, [mostRecentUpdate, refresh])
 
   const navigate = async (event: MouseEvent<Element>, href: string) => {
@@ -164,7 +164,7 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
 
                 </div>
                 {hasChildren && <Button type="button" buttonStyle="ghost" className="pages-sidebar__expand"
-                  icon={<ChevronIcon direction={children ? 'down' : 'right'} size={24} />} round margin={false}
+                  icon={<ChevronIcon direction={children ? 'down' : 'right'} size={16} />} round margin={false}
                   aria-label={`${children ? 'Collapse' : 'Expand'} ${page.title}`} aria-expanded={children !== null}
                   onClick={() => toggle(key)} />}
               </>}
@@ -187,8 +187,10 @@ function PagesSidebarTree({ adminRoute, hasMore, pages: initialPages }: {
           <PopupList.MenuItem><PopupList.Button href={`${adminRoute}/collections/pages?view=all`}>All pages</PopupList.Button></PopupList.MenuItem>
         </Popup>
         <div className="pages-sidebar__actions">
-          <Button aria-label="Add page" buttonStyle="ghost" icon="plus" round margin={false}
-            type="button" disabled={creatingPage} onClick={() => void createPage()} />
+          <Button buttonStyle="ghost" icon="plus" iconPosition="left" margin={false}
+            size="medium" type="button" disabled={creatingPage} onClick={() => void createPage()}>
+            New page
+          </Button>
         </div>
       </div>
       <NavGroup label="Pages" isOpen>

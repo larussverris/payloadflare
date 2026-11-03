@@ -6,6 +6,11 @@ const nextConfig: NextConfig = {
   // patterns to the IP addresses or hostnames used by your development setup.
   allowedDevOrigins: ['10.*.*.*', '172.*.*.*', '192.168.*.*'],
   transpilePackages: ['@payloadflare/email-cloudflare', '@payloadflare/path-preview'],
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: '/', destination: '/home' }],
+    }
+  },
   async headers() {
     return [
       {
