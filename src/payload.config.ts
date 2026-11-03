@@ -16,6 +16,7 @@ import { r2Storage } from '@payloadcms/storage-r2'
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
+import { pathPreview } from '@payloadflare/path-preview'
 import { mediaURLVersions } from '@payloadflare/media-url-versions'
 import * as blockSchemas from '@/blocks/config'
 import * as collections from '@/collections'
@@ -152,6 +153,7 @@ const config = buildConfig({
   }),
   logger: isProduction ? cloudflareLogger : undefined,
   plugins: [
+    pathPreview({ collections: ['pages'], replace: [/^\/home$/, '/'] }),
     mediaURLVersions({ collections: [collections.Media.slug] }),
     seoPlugin({
       uploadsCollection: collections.Media.slug,

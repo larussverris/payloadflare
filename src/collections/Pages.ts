@@ -104,13 +104,6 @@ export const Pages: CollectionConfig = {
               admin: { position: 'main', condition: (data) => data.isHome !== true },
             },
             {
-              name: 'pageURLPreview',
-              type: 'ui',
-              admin: {
-                components: { Field: '/admin/components/PathPreview#PathPreview' },
-              },
-            },
-            {
               name: 'isHome',
               type: 'checkbox',
               label: 'Homepage',

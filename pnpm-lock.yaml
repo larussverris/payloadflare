@@ -110,6 +110,9 @@ importers:
       '@payloadflare/media-url-versions':
         specifier: workspace:*
         version: link:packages/media-url-versions
+      '@payloadflare/path-preview':
+        specifier: workspace:*
+        version: link:packages/path-preview
       graphql:
         specifier: ^16.14.2
         version: 16.14.2
@@ -186,6 +189,18 @@ importers:
       payload:
         specifier: 'catalog:'
         version: 4.0.0-beta.6(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3)
+
+  packages/path-preview:
+    dependencies:
+      '@payloadcms/ui':
+        specifier: 'catalog:'
+        version: 4.0.0-beta.6(@types/react@19.2.14)(monaco-editor@0.56.0)(payload@4.0.0-beta.6(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3))(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(supports-color@10.2.2)(typescript@6.0.3)
+      payload:
+        specifier: 'catalog:'
+        version: 4.0.0-beta.6(graphql@16.14.2)(supports-color@10.2.2)(typescript@6.0.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.8
 
 packages:
 

@@ -1,6 +1,6 @@
 import { LLMInstructionsMenuItem as LLMInstructionsMenuItem_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { PageParentField as PageParentField_d946fa2370bc52cf54e70c613fa3a69a } from '../../../admin/components/PageSettingsDrawer'
-import { PathPreview as PathPreview_9b42f0d3c725f8bc73f485dfa4888bd3 } from '../../../admin/components/PathPreview'
+import { PathPreview as PathPreview_6da354f796cd79f5b50255dc4ee57570 } from '@payloadflare/path-preview/client'
 import { PageHomepageField as PageHomepageField_e67cfcf00dbf5010885427039df9d4f3 } from '../../../admin/components/PageHomepageField'
 import { OverviewComponent as OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
 import { MetaTitleComponent as MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860 } from '@payloadcms/plugin-seo/client'
@@ -53,7 +53,7 @@ import { R2ClientUploadHandler as R2ClientUploadHandler_85cc02ed84006fcc91d3aff3
 export const importMap = {
   "@payloadcms/ui#LLMInstructionsMenuItem": LLMInstructionsMenuItem_3817bf644402e67bfe6577f60ef982de,
   "/admin/components/PageSettingsDrawer#PageParentField": PageParentField_d946fa2370bc52cf54e70c613fa3a69a,
-  "/admin/components/PathPreview#PathPreview": PathPreview_9b42f0d3c725f8bc73f485dfa4888bd3,
+  "@payloadflare/path-preview/client#PathPreview": PathPreview_6da354f796cd79f5b50255dc4ee57570,
   "/admin/components/PageHomepageField#PageHomepageField": PageHomepageField_e67cfcf00dbf5010885427039df9d4f3,
   "@payloadcms/plugin-seo/client#OverviewComponent": OverviewComponent_a8a977ebc872c5d5ea7ee689724c0860,
   "@payloadcms/plugin-seo/client#MetaTitleComponent": MetaTitleComponent_a8a977ebc872c5d5ea7ee689724c0860,

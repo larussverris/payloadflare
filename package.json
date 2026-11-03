@@ -38,6 +38,7 @@
     "@payloadcms/sdk": "catalog:",
     "@payloadflare/email-cloudflare": "workspace:*",
     "@payloadflare/media-url-versions": "workspace:*",
+    "@payloadflare/path-preview": "workspace:*",
     "graphql": "^16.14.2",
     "next": "catalog:",
     "payload": "catalog:",
