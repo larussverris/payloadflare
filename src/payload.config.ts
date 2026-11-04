@@ -63,6 +63,10 @@ const cloudflare =
 
 const config = buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
+  auth: {
+    // Cloudflare Workers limits PBKDF2 to 100,000 iterations.
+    passwordHashIterations: 100000,
+  },
   admin: {
     components: {
       sidebar: {

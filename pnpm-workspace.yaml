@@ -11,7 +11,7 @@ catalog:
   '@types/react-dom': 19.3.0
   next: 16.4.5
   # Keep all Payload packages on the same release.
-  payload: &payloadVersion 4.0.0-beta.6
+  payload: &payloadVersion 4.0.0-beta.7
   '@payloadcms/db-d1-sqlite': *payloadVersion
   '@payloadcms/drizzle': *payloadVersion
   '@payloadcms/live-preview-react': *payloadVersion
@@ -34,22 +34,22 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@payloadcms/sdk@4.0.0-beta.6'
-  - '@payloadcms/db-d1-sqlite@4.0.0-beta.6'
-  - '@payloadcms/drizzle@4.0.0-beta.6'
-  - '@payloadcms/graphql@4.0.0-beta.6'
-  - '@payloadcms/live-preview@4.0.0-beta.6'
-  - '@payloadcms/live-preview-react@4.0.0-beta.6'
-  - '@payloadcms/next@4.0.0-beta.6'
-  - '@payloadcms/plugin-cloud-storage@4.0.0-beta.6'
-  - '@payloadcms/plugin-form-builder@4.0.0-beta.6'
-  - '@payloadcms/plugin-seo@4.0.0-beta.6'
-  - '@payloadcms/richtext-lexical@4.0.0-beta.6'
-  - '@payloadcms/storage-r2@4.0.0-beta.6'
-  - '@payloadcms/storage-s3@4.0.0-beta.6'
-  - '@payloadcms/translations@4.0.0-beta.6'
-  - '@payloadcms/ui@4.0.0-beta.6'
-  - payload@4.0.0-beta.6
+  - '@payloadcms/sdk@4.0.0-beta.7'
+  - '@payloadcms/db-d1-sqlite@4.0.0-beta.7'
+  - '@payloadcms/drizzle@4.0.0-beta.7'
+  - '@payloadcms/graphql@4.0.0-beta.7'
+  - '@payloadcms/live-preview@4.0.0-beta.7'
+  - '@payloadcms/live-preview-react@4.0.0-beta.7'
+  - '@payloadcms/next@4.0.0-beta.7'
+  - '@payloadcms/plugin-cloud-storage@4.0.0-beta.7'
+  - '@payloadcms/plugin-form-builder@4.0.0-beta.7'
+  - '@payloadcms/plugin-seo@4.0.0-beta.7'
+  - '@payloadcms/richtext-lexical@4.0.0-beta.7'
+  - '@payloadcms/storage-r2@4.0.0-beta.7'
+  - '@payloadcms/storage-s3@4.0.0-beta.7'
+  - '@payloadcms/translations@4.0.0-beta.7'
+  - '@payloadcms/ui@4.0.0-beta.7'
+  - payload@4.0.0-beta.7
   - '@cloudflare/workerd-darwin-64@1.20261103.1'
   - '@cloudflare/workerd-darwin-arm64@1.20261103.1'
   - '@cloudflare/workerd-linux-64@1.20261103.1'
