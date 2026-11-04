@@ -4,7 +4,7 @@
  * Manage 404 page content in the NotFoundPage global.
  */
 
-import { unstable_cache } from 'next/cache'
+import { cacheLife } from 'next/cache'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { draftMode } from 'next/headers'
@@ -21,7 +21,12 @@ async function findNotFoundPage(draft = false) {
   })
 }
 
-const getNotFoundPage = unstable_cache(findNotFoundPage, ['not-found-page'], { revalidate: 3600 })
+async function getNotFoundPage() {
+  'use cache'
+  cacheLife('hours')
+
+  return findNotFoundPage()
+}
 
 export default async function NotFound() {
   const { isEnabled } = await draftMode()
