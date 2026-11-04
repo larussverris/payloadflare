@@ -36,9 +36,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# generated Payload types
-/src/payload-types.ts
-
 .env
 
 /media
