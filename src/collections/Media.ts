@@ -17,24 +17,15 @@ export const Media: CollectionConfig = {
     crop: false,
     focalPoint: false,
     modifyResponseHeaders: ({ headers }) => {
+      // Cache all public media in browsers, but only images at Cloudflare's edge.
+      headers.set('Cache-Control', 'public, max-age=2592000')
       headers.set('Cloudflare-CDN-Cache-Control', 'no-store')
 
       if (!headers.get('Content-Type')?.startsWith('image/')) {
         return headers
       }
 
-      // This collection permits public reads. Cache the same Payload URL
-      // at the edge so repeat visitors do not need another Payload/R2 read.
-      headers.set(
-        'Cache-Control',
-        process.env.NODE_ENV === 'production'
-          ? 'public, max-age=2592000, s-maxage=2592000'
-          : 'no-store',
-      )
-      headers.set(
-        'Cloudflare-CDN-Cache-Control',
-        process.env.NODE_ENV === 'production' ? 'public, s-maxage=2592000' : 'no-store',
-      )
+      headers.set('Cloudflare-CDN-Cache-Control', 'public, s-maxage=2592000')
 
       return headers
     },
