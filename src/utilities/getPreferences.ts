@@ -5,13 +5,14 @@
  */
 
 import config from '@payload-config'
-import { cacheLife } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
-export async function getPreferences() {
-  'use cache'
-  cacheLife('hours')
-
-  const payload = await getPayload({ config })
-  return payload.findGlobal({ slug: 'preferences', depth: 1 })
-}
+export const getPreferences = unstable_cache(
+  async () => {
+    const payload = await getPayload({ config })
+    return payload.findGlobal({ slug: 'preferences', depth: 1 })
+  },
+  ['preferences'],
+  { revalidate: 3600 },
+)

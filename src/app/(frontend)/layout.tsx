@@ -6,38 +6,40 @@ import type { Metadata } from 'next'
 import config from '@payload-config'
 import { draftMode } from 'next/headers'
 import { RefreshRouteOnSave } from '@payloadcms/live-preview-react'
-import { refresh, cacheLife } from 'next/cache'
+import { refresh, unstable_cache } from 'next/cache'
 import { getPayload } from 'payload'
 
 import './globals.css'
 
-async function getHeader(draft: boolean) {
-  'use cache'
-  cacheLife('hours')
+const getHeader = unstable_cache(
+  async (draft: boolean) => {
+    const payload = await getPayload({ config })
+    return payload.findGlobal({
+      slug: 'header',
+      depth: 2,
+      disableErrors: true,
+      draft,
+      overrideAccess: draft,
+    })
+  },
+  ['header'],
+  { revalidate: 3600 },
+)
 
-  const payload = await getPayload({ config })
-  return payload.findGlobal({
-    slug: 'header',
-    depth: 2,
-    disableErrors: true,
-    draft,
-    overrideAccess: draft,
-  })
-}
-
-async function getFooter(draft: boolean) {
-  'use cache'
-  cacheLife('hours')
-
-  const payload = await getPayload({ config })
-  return payload.findGlobal({
-    slug: 'footer',
-    depth: 2,
-    disableErrors: true,
-    draft,
-    overrideAccess: draft,
-  })
-}
+const getFooter = unstable_cache(
+  async (draft: boolean) => {
+    const payload = await getPayload({ config })
+    return payload.findGlobal({
+      slug: 'footer',
+      depth: 2,
+      disableErrors: true,
+      draft,
+      overrideAccess: draft,
+    })
+  },
+  ['footer'],
+  { revalidate: 3600 },
+)
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props

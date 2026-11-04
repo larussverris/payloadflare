@@ -5,14 +5,11 @@
  */
 
 import type { MetadataRoute } from 'next'
-import { cacheLife } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
 async function sitemap() {
-  'use cache'
-  cacheLife('days')
-
   const payload = await getPayload({ config })
   const { docs } = await payload.find({
     collection: 'pages',
@@ -41,4 +38,4 @@ async function sitemap() {
   return entries
 }
 
-export default sitemap
+export default unstable_cache(sitemap, ['sitemap'], { revalidate: 3600 })

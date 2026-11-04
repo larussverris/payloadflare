@@ -5,7 +5,7 @@
  */
 
 import type { Metadata } from 'next'
-import { cacheLife } from 'next/cache'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
@@ -15,34 +15,35 @@ import { renderBlocks } from '@/utilities/renderBlocks'
 
 type Props = { params: Promise<{ slug: string[] }> }
 
-async function queryPage(pathname: string, draft: boolean) {
-  'use cache'
-  cacheLife('hours')
+const queryPage = unstable_cache(
+  async (pathname: string, draft: boolean) => {
+    const slug = pathname.split('/').at(-1)!
 
-  const slug = pathname.split('/').at(-1)!
-
-  const payload = await getPayload({ config })
-  const { docs } = await payload.find({
-    collection: 'pages',
-    overrideAccess: draft,
-    draft,
-    depth: 2,
-    context: { computeHierarchyPaths: true },
-    // Explicitly select the native path so all ancestors are included in this beta.
-    select: {
-      _h_slugPath: true,
-      // This beta needs status to compute draft ancestor paths correctly.
-      _status: true,
-      slug: true,
-      title: true,
-      meta: true,
-      layout: true,
-    },
-    pagination: false,
-    where: { slug: { equals: slug } },
-  })
-  return docs.find((page) => page._h_slugPath === pathname) ?? null
-}
+    const payload = await getPayload({ config })
+    const { docs } = await payload.find({
+      collection: 'pages',
+      overrideAccess: draft,
+      draft,
+      depth: 2,
+      context: { computeHierarchyPaths: true },
+      // Explicitly select the native path so all ancestors are included in this beta.
+      select: {
+        _h_slugPath: true,
+        // This beta needs status to compute draft ancestor paths correctly.
+        _status: true,
+        slug: true,
+        title: true,
+        meta: true,
+        layout: true,
+      },
+      pagination: false,
+      where: { slug: { equals: slug } },
+    })
+    return docs.find((page) => page._h_slugPath === pathname) ?? null
+  },
+  undefined,
+  { revalidate: 3600 },
+)
 
 export default async function Page({ params }: Props) {
   const { slug } = await params
