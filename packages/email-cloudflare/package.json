@@ -19,6 +19,6 @@
     "@types/nodemailer": "^8.0.2",
     "payload": "catalog:",
     "typescript": "catalog:",
-    "vitest": "^4.1.11"
+    "vitest": "catalog:"
   }
 }
