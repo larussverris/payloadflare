@@ -1,18 +1,54 @@
 import { OrganizationSchema } from '@/components/OrganizationSchema'
 import { getPreferences } from '@/utilities/getPreferences'
+import { renderBlocks } from '@/utilities/renderBlocks'
 import React from 'react'
 import type { Metadata } from 'next'
 import config from '@payload-config'
 import { draftMode } from 'next/headers'
 import { RefreshRouteOnSave } from '@payloadcms/live-preview-react'
-import { refresh } from 'next/cache'
+import { refresh, unstable_cache } from 'next/cache'
+import { getPayload } from 'payload'
 
 import './globals.css'
+
+const getHeader = unstable_cache(
+  async (draft: boolean) => {
+    const payload = await getPayload({ config })
+    return payload.findGlobal({
+      slug: 'header',
+      depth: 2,
+      disableErrors: true,
+      draft,
+      overrideAccess: draft,
+    })
+  },
+  ['header'],
+  { revalidate: 3600 },
+)
+
+const getFooter = unstable_cache(
+  async (draft: boolean) => {
+    const payload = await getPayload({ config })
+    return payload.findGlobal({
+      slug: 'footer',
+      depth: 2,
+      disableErrors: true,
+      draft,
+      overrideAccess: draft,
+    })
+  },
+  ['footer'],
+  { revalidate: 3600 },
+)
 
 export default async function RootLayout(props: { children: React.ReactNode }) {
   const { children } = props
   const { pageLanguage } = await getPreferences()
   const { isEnabled } = await draftMode()
+  const [header, footer] = await Promise.all([
+    getHeader(isEnabled),
+    getFooter(isEnabled),
+  ])
   const { serverURL } = await config
 
   async function refreshPreview() {
@@ -27,7 +63,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
       </head>
       <body>
         {isEnabled && <RefreshRouteOnSave refresh={refreshPreview} serverURL={serverURL!} />}
+        <header>{renderBlocks(header?.layout)}</header>
         <main>{children}</main>
+        <footer>{renderBlocks(footer?.layout)}</footer>
       </body>
     </html>
   )
