@@ -9,17 +9,24 @@ import { PagesSidebarTree } from './PagesSidebarTree'
 export async function PagesSidebarTab({ payload, req, user }: SidebarTabServerProps) {
   if (!user) return null
   const result = await payload.find({
-    collection: 'pages', depth: 0, draft: true, limit: 250,
+    collection: 'pages',
+    depth: 0,
+    draft: true,
+    limit: 250,
     select: { slug: true, title: true, parent: true, _status: true },
-    sort: ['title', 'id'], user: req?.user ?? user,
+    sort: ['title', 'id'],
+    user: req?.user ?? user,
   })
-  return <PagesSidebarTree
-    adminRoute={payload.config.routes.admin}
-    hasMore={result.hasNextPage}
-    pages={result.docs.map(page => ({
-      id: page.id, title: page.title || String(page.id),
-      isHome: page.slug === 'home', _status: page._status,
-      parentId: typeof page.parent === 'object' ? page.parent?.id : page.parent,
-    }))}
-  />
+  return (
+    <PagesSidebarTree
+      adminRoute={payload.config.routes.admin}
+      pages={result.docs.map((page) => ({
+        id: page.id,
+        title: page.title || String(page.id),
+        isHome: page.slug === 'home',
+        _status: page._status,
+        parentId: typeof page.parent === 'object' ? page.parent?.id : page.parent,
+      }))}
+    />
+  )
 }
