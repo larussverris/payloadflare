@@ -63,6 +63,11 @@ const cloudflare =
 
 const config = buildConfig({
   serverURL: process.env.NEXT_PUBLIC_SERVER_URL,
+  onInit: (payload) => {
+    // Work around the D1 adapter's update-only upsert until Payload fixes #17202.
+    const updateOne = payload.db.updateOne.bind(payload.db)
+    payload.db.upsert = (args) => updateOne({ ...args, options: { upsert: true } })
+  },
   auth: {
     // Cloudflare Workers limits PBKDF2 to 100,000 iterations.
     passwordHashIterations: 100000,
