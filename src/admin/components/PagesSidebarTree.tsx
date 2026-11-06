@@ -5,101 +5,57 @@
 
 'use client'
 
-import { useDndMonitor, type DragMoveEvent } from '@dnd-kit/core'
 import {
   Button,
   ChevronIcon,
   DocumentIcon,
-  DraggableSortable,
-  DragHandleIcon,
   Link,
-  NavGroup,
-  Popup,
-  PopupList,
+  MenuSeparator,
+  PlusIcon,
+  SidebarRow,
   toast,
+  useAuth,
   useDocumentEvents,
-  useDraggableSortable,
+  usePathname,
   usePreferences,
   useRouteTransition,
   useRouter,
-  useSidebarTabs,
 } from '@payloadcms/ui'
-import { usePathname, useRouter as useNextRouter } from 'next/navigation'
 import { PREFERENCE_KEYS } from 'payload/shared'
-import { useCallback, useEffect, useRef, useState, type MouseEvent, type ReactNode } from 'react'
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { comparePages, type SidebarPage } from '@/admin/utilities/pageTree'
-import { getTreeDropTarget, type TreeDropTarget } from '@/admin/utilities/treeDrop'
 import { usePayloadSDK } from '../hooks/usePayloadSDK'
 import { HomeIcon } from '@/admin/icons/HomeIcon'
 
-type Branch = { page: SidebarPage; children: Branch | null }[]
-
-function PagesSidebarTree({
-  adminRoute,
-  pages: initialPages,
-}: {
-  adminRoute: string
-  pages: SidebarPage[]
-}) {
+function PagesSidebarTree({ adminRoute, pages }: { adminRoute: string; pages: SidebarPage[] }) {
   const sdk = usePayloadSDK()
   const router = useRouter()
-  const { refresh: refreshRoute } = useNextRouter()
-  const sidebarTabs = useSidebarTabs()
-  const reloadTabContent = sidebarTabs?.reloadTabContent
-  const refresh = useCallback(() => {
-    reloadTabContent?.('site-pages')
-    refreshRoute()
-  }, [reloadTabContent, refreshRoute])
+  const { permissions } = useAuth()
+  const canCreate = Boolean(permissions?.collections?.pages?.create)
+  const refresh = useCallback(() => router.refresh(), [router])
   const pathname = usePathname()
   const { startRouteTransition } = useRouteTransition()
   const { setPreference } = usePreferences()
   const { mostRecentUpdate } = useDocumentEvents()
   const lastDocumentEvent = useRef(mostRecentUpdate)
-  const [moving, setMoving] = useState(false)
   const [creatingPage, setCreatingPage] = useState(false)
   const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set())
-  const [dropTarget, setDropTarget] = useState<TreeDropTarget | null>(null)
-  const [savedMoves, setSavedMoves] = useState<{
-    pages: SidebarPage[]
-    items: Record<string, Pick<SidebarPage, 'parentId'>>
-  } | null>(null)
-  const overrides = savedMoves?.pages === initialPages ? savedMoves.items : {}
-  const pages = initialPages.map((page) => ({ ...page, ...overrides[`page:${page.id}`] }))
-  const pageByID = new Map(pages.map((page) => [String(page.id), page]))
-  const currentPageRef = useRef<HTMLLIElement>(null)
   const pageRoute = `${adminRoute}/collections/pages/`
   const currentPageID = pathname.startsWith(pageRoute)
     ? decodeURIComponent(pathname.slice(pageRoute.length).split('/')[0])
     : null
 
   useEffect(() => {
-    currentPageRef.current?.scrollIntoView({ block: 'nearest' })
-  }, [currentPageID, collapsed])
-  useEffect(() => {
     if (mostRecentUpdate === lastDocumentEvent.current) return
     lastDocumentEvent.current = mostRecentUpdate
     if (['pages', 'preferences'].includes(mostRecentUpdate?.entitySlug ?? '')) refresh()
   }, [mostRecentUpdate, refresh])
 
-  const navigate = (event: MouseEvent<Element>, href: string) => {
-    if (
-      event.defaultPrevented ||
-      event.button !== 0 ||
-      event.metaKey ||
-      event.ctrlKey ||
-      event.shiftKey ||
-      event.altKey
-    )
-      return
-    event.preventDefault()
-    // Persist the sidebar tab without delaying navigation on the preference request.
+  const rememberPagesTab = useCallback(() => {
     void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, { activeTab: 'site-pages' }).catch(
       () => undefined,
     )
-    startRouteTransition(() => {
-      void router.push(href)
-    })
-  }
+  }, [setPreference])
   const createPage = async () => {
     if (creatingPage) return
     setCreatingPage(true)
@@ -109,9 +65,7 @@ function PagesSidebarTree({
         draft: true,
         data: { title: 'Untitled', slug: '' },
       })
-      void setPreference(PREFERENCE_KEYS.NAV_SIDEBAR_ACTIVE_TAB, {
-        activeTab: 'site-pages',
-      }).catch(() => undefined)
+      rememberPagesTab()
       startRouteTransition(() => {
         void router.push(`${pageRoute}${page.id}`)
       })
@@ -122,275 +76,178 @@ function PagesSidebarTree({
       setCreatingPage(false)
     }
   }
-  const saveMove = async (id: string, target: TreeDropTarget) => {
-    if (moving) return
-    const source = pageByID.get(id.slice(5))
-    const destination = target.id === 'root' ? null : pageByID.get(target.id.slice(5))
-    if (!source || source.isHome || (target.id !== 'root' && !destination)) return
-    setMoving(true)
-    const toastID = toast.loading('Saving move…')
-    try {
-      const parentId = destination?.id ?? null
-      const saved = await sdk.update({
-        collection: 'pages',
-        id: Number(source.id),
-        draft: source._status === 'draft',
-        data: { parent: parentId == null ? null : Number(parentId) },
-      })
-      const savedParentId = typeof saved.parent === 'object' ? saved.parent?.id : saved.parent
-      const items = { ...overrides, [id]: { parentId: savedParentId ?? null } }
-      setSavedMoves({ pages: initialPages, items })
-      setCollapsed((previous) => {
-        const next = new Set(previous)
-        if (parentId != null) next.delete(String(parentId))
-        return next
-      })
-      refresh()
-      toast.success('Move saved.', { id: toastID })
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not save the move.', {
-        id: toastID,
-      })
-    } finally {
-      setMoving(false)
+  // Group and sort only when the server supplies new page data.
+  const byParent = useMemo(() => {
+    const pageIDs = new Set(pages.map((page) => String(page.id)))
+    const groups = new Map<string, SidebarPage[]>()
+    for (const page of pages) {
+      const parent =
+        page.isHome || page.parentId == null || !pageIDs.has(String(page.parentId))
+          ? 'root'
+          : String(page.parentId)
+      const siblings = groups.get(parent) ?? []
+      siblings.push(page)
+      groups.set(parent, siblings)
     }
-  }
+    for (const siblings of groups.values()) siblings.sort(comparePages)
+    return groups
+  }, [pages])
 
-  const ancestors = new Set<string>()
-  let ancestor = currentPageID ? pageByID.get(currentPageID)?.parentId : null
-  while (ancestor != null && !ancestors.has(String(ancestor))) {
-    ancestors.add(String(ancestor))
-    ancestor = pageByID.get(String(ancestor))?.parentId
-  }
-  const byParent = new Map<string, SidebarPage[]>()
-  for (const page of pages) {
-    const key =
-      page.isHome || page.parentId == null || !pageByID.has(String(page.parentId))
-        ? 'root'
-        : String(page.parentId)
-    const siblings = byParent.get(key) ?? []
-    siblings.push(page)
-    byParent.set(key, siblings)
-  }
-  const visibleIDs = ['root']
-  const buildBranch = (parent: string, visited = new Set<string>()): Branch =>
-    [...(byParent.get(parent) ?? [])]
-      .sort(comparePages)
-      .filter((page) => !visited.has(String(page.id)))
-      .map((page) => {
-        const key = String(page.id)
-        visibleIDs.push(`page:${key}`)
-        return {
-          page,
-          children: collapsed.has(key) ? null : buildBranch(key, new Set([...visited, key])),
-        }
-      })
-  const tree = buildBranch('root')
-  const toggle = (id: string) =>
+  const visiblePages = useMemo(() => {
+    const rows: { page: SidebarPage; depth: number; hasChildren: boolean; expanded: boolean }[] = []
+    const visited = new Set<string>()
+    const visit = (parent: string, depth: number) => {
+      for (const page of byParent.get(parent) ?? []) {
+        const id = String(page.id)
+        if (visited.has(id)) continue
+        visited.add(id)
+        const hasChildren = byParent.has(id)
+        const expanded = !collapsed.has(id)
+        rows.push({ page, depth, hasChildren, expanded })
+        if (hasChildren && expanded) visit(id, depth + 1)
+      }
+    }
+    visit('root', 0)
+    return rows
+  }, [byParent, collapsed])
+
+  const toggle = useCallback((id: string) => {
     setCollapsed((previous) => {
       const next = new Set(previous)
       if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
     })
-  const renderBranch = (branch: Branch, depth: number): ReactNode => (
-    <ul className="pages-sidebar__list">
-      {branch.map(({ page, children }) => {
-        const key = String(page.id),
-          dragID = `page:${key}`
-        const href = `${pageRoute}${encodeURIComponent(key)}`
-        const isCurrent = key === currentPageID
-        const hasChildren = byParent.has(key)
-        return (
-          <li
-            className="pages-sidebar__item"
-            key={key}
-            ref={isCurrent ? currentPageRef : undefined}
-          >
-            <TreeDragRow
-              id={dragID}
-              disabled={moving || page.isHome}
-              dropInside={dropTarget?.id === dragID}
-            >
-              {({ attributes, listeners }) => (
-                <>
-                  {!page.isHome && (
-                    <button
-                      {...attributes}
-                      {...listeners}
-                      aria-label={`Move ${page.title}`}
-                      className="pages-sidebar__drag-handle"
-                      disabled={moving}
-                      type="button"
-                    >
-                      <DragHandleIcon size={16} />
-                    </button>
-                  )}
-                  <div data-current-ancestor={ancestors.has(key) || undefined}>
-                    <Link
-                      draggable={false}
-                      aria-current={isCurrent ? 'page' : undefined}
-                      href={href}
-                      className={`nav__link pages-sidebar__page-link${isCurrent ? ' nav__link--selected' : ''}`}
-                      onClick={(event) => void navigate(event, href)}
-                      prefetch={false}
-                      style={{ paddingInlineStart: `calc(var(--spacer-3) + ${depth * 16 + 8}px)` }}
-                    >
-                      <span aria-hidden="true" className="pages-sidebar__node-icon">
-                        {page.isHome ? <HomeIcon /> : <DocumentIcon size={16} />}
-                      </span>
-                      <span className="nav__link-label">{page.title}</span>
-                    </Link>
-                  </div>
-                  {hasChildren && (
-                    <Button
-                      type="button"
-                      buttonStyle="ghost"
-                      className="pages-sidebar__expand"
-                      icon={<ChevronIcon direction={children ? 'down' : 'right'} size={16} />}
-                      round
-                      margin={false}
-                      aria-label={`${children ? 'Collapse' : 'Expand'} ${page.title}`}
-                      aria-expanded={children !== null}
-                      onClick={() => toggle(key)}
-                    />
-                  )}
-                </>
-              )}
-            </TreeDragRow>
-            {children && children.length > 0 && renderBranch(children, depth + 1)}
-          </li>
-        )
-      })}
-    </ul>
-  )
+  }, [])
 
   return (
-    <nav aria-label="Pages" className="pages-sidebar">
-      <div className="nav__header">
-        <Popup
-          caret={false}
-          horizontalAlign="left"
-          popupType="menu"
-          verticalAlign="bottom"
-          renderButton={({ active, ...ariaProps }) => (
+    <nav aria-label="Pages" className="hierarchy-sidebar-tab pages-sidebar">
+      <section aria-label="Pages" className="tree">
+        <div className="tree__all-option-wrapper">
+          <SidebarRow
+            as="h2"
+            className="tree__all-option pages-sidebar__section-title"
+            title="Pages"
+          />
+          {canCreate && (
             <Button
-              {...ariaProps}
-              aria-label="Pages menu"
               buttonStyle="ghost"
-              className="user-menu__trigger user-menu__trigger--with-title"
+              className="tree__create-button"
+              aria-label="Create new page"
               margin={false}
-              selected={active}
               type="button"
+              disabled={creatingPage}
+              onClick={() => void createPage()}
             >
-              Pages
+              <PlusIcon size={24} />
             </Button>
           )}
-        >
-          <PopupList.MenuItem>
-            <PopupList.Button href={`${adminRoute}/collections/pages?view=all`}>
-              All pages
-            </PopupList.Button>
-          </PopupList.MenuItem>
-        </Popup>
-        <div className="pages-sidebar__actions">
-          <Button
-            buttonStyle="ghost"
-            icon="plus"
-            iconPosition="left"
-            margin={false}
-            size="medium"
-            type="button"
-            disabled={creatingPage}
-            onClick={() => void createPage()}
-          >
-            New page
-          </Button>
         </div>
-      </div>
-      <NavGroup label="Pages" isOpen>
-        <DraggableSortable
-          className="pages-sidebar__sortable"
-          ids={visibleIDs}
-          sortingStrategy={() => null}
-          renderDragOverlay={() => null}
-          onDragEnd={({ event }) => {
-            const target = getTreeDropTarget(event, visibleIDs, pages)
-            if (target) void saveMove(String(event.active.id), target)
-          }}
-        >
-          <TreeDragMonitor
-            ids={visibleIDs}
-            pages={pages}
-            onChange={(target) => {
-              setDropTarget((previous) => (previous?.id === target?.id ? previous : target))
-            }}
+        <ul className="pages-sidebar__list">
+          {visiblePages.map(({ page, depth, hasChildren, expanded }) => (
+            <PageTreeRow
+              key={page.id}
+              id={String(page.id)}
+              title={page.title}
+              isHome={Boolean(page.isHome)}
+              href={`${pageRoute}${encodeURIComponent(String(page.id))}`}
+              depth={depth}
+              hasChildren={hasChildren}
+              expanded={expanded}
+              selected={String(page.id) === currentPageID}
+              onToggle={toggle}
+              onNavigate={rememberPagesTab}
+            />
+          ))}
+        </ul>
+      </section>
+      <MenuSeparator />
+      <section aria-label="Utility pages" className="tree">
+        <div className="tree__all-option-wrapper">
+          <SidebarRow
+            as="h2"
+            className="tree__all-option pages-sidebar__section-title"
+            title="Utility pages"
           />
-          <TreeDragRow id="root" dropInside={dropTarget?.id === 'root'}>
-            {() => <div aria-hidden="true" className="pages-sidebar__root-drop" />}
-          </TreeDragRow>
-          {renderBranch(tree, 0)}
-        </DraggableSortable>
-      </NavGroup>
-      <NavGroup label="Utility pages" isOpen>
-        <div className="nav__link-wrapper">
-          <Link
-            href={`${adminRoute}/globals/not-found-page`}
-            className={`nav__link${pathname === `${adminRoute}/globals/not-found-page` ? ' nav__link--selected' : ''}`}
-            onClick={(event) => void navigate(event, `${adminRoute}/globals/not-found-page`)}
-            prefetch={false}
-          >
-            <span aria-hidden="true" className="pages-sidebar__node-icon">
-              <DocumentIcon size={16} />
-            </span>
-            <span className="nav__link-label">404</span>
-          </Link>
         </div>
-      </NavGroup>
+        <SidebarRow
+          as={Link}
+          href={`${adminRoute}/globals/not-found-page`}
+          selected={pathname === `${adminRoute}/globals/not-found-page`}
+          icon={<DocumentIcon size={16} />}
+          className="pages-sidebar__utility-link"
+          title="404"
+          onClick={rememberPagesTab}
+          prefetch={false}
+        />
+      </section>
     </nav>
   )
 }
 
-type DragRowState = Pick<ReturnType<typeof useDraggableSortable>, 'attributes' | 'listeners'>
-function TreeDragRow({
-  id,
-  disabled,
-  dropInside,
-  children,
-}: {
+type PageTreeRowProps = {
   id: string
-  disabled?: boolean
-  dropInside?: boolean
-  children: (state: DragRowState) => ReactNode
-}) {
-  const { attributes, listeners, setNodeRef, isDragging } = useDraggableSortable({ id, disabled })
+  title: string
+  isHome: boolean
+  href: string
+  depth: number
+  hasChildren: boolean
+  expanded: boolean
+  selected: boolean
+  onToggle: (id: string) => void
+  onNavigate: () => void
+}
+
+// Scalar props let unchanged rows survive fresh server results as well as local state changes.
+const PageTreeRow = memo(function PageTreeRow({
+  id,
+  title,
+  isHome,
+  href,
+  depth,
+  hasChildren,
+  expanded,
+  selected,
+  onToggle,
+  onNavigate,
+}: PageTreeRowProps) {
+  const ref = useRef<HTMLLIElement>(null)
+  useEffect(() => {
+    if (selected) ref.current?.scrollIntoView({ block: 'nearest' })
+  }, [selected])
   return (
-    <div
-      ref={setNodeRef}
-      data-drop-inside={dropInside || undefined}
-      className={`pages-sidebar__folder-row${id === 'root' ? ' pages-sidebar__root-row' : ''}${isDragging ? ' pages-sidebar__row--dragging' : ''}`}
-    >
-      {children({ attributes, listeners })}
-    </div>
+    <li className="tree-node" ref={ref} style={{ '--tree-depth': depth } as CSSProperties}>
+      <div className="tree-node__content-wrapper">
+        <div
+          className={`tree-node__content sidebar-row${selected ? ' sidebar-row--selected' : ''}`}
+        >
+          <button
+            type="button"
+            className="tree-node__toggle"
+            aria-label={`${expanded ? 'Collapse' : 'Expand'} ${title}`}
+            aria-expanded={hasChildren ? expanded : undefined}
+            disabled={!hasChildren}
+            onClick={() => onToggle(id)}
+          >
+            <ChevronIcon direction={expanded ? 'down' : 'right'} size={16} />
+          </button>
+          <Link
+            draggable={false}
+            aria-current={selected ? 'page' : undefined}
+            href={href}
+            className="tree-node__node-trigger"
+            onClick={onNavigate}
+            prefetch={false}
+          >
+            <span aria-hidden="true" className="sidebar-row__icon">
+              {isHome ? <HomeIcon /> : <DocumentIcon size={16} />}
+            </span>
+            <span className="tree-node__title sidebar-row__title">{title}</span>
+          </Link>
+        </div>
+      </div>
+    </li>
   )
-}
-function TreeDragMonitor({
-  ids,
-  pages,
-  onChange,
-}: {
-  ids: string[]
-  pages: SidebarPage[]
-  onChange: (target: TreeDropTarget | null) => void
-}) {
-  const update = (event: DragMoveEvent) => onChange(getTreeDropTarget(event, ids, pages))
-  useDndMonitor({
-    onDragMove: update,
-    onDragOver: update,
-    onDragEnd: () => onChange(null),
-    onDragCancel: () => onChange(null),
-  })
-  return null
-}
+})
 
 export { PagesSidebarTree }

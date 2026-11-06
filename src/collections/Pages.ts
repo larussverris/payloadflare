@@ -28,7 +28,7 @@ export const Pages: CollectionConfig = {
       components: { Icon: '@payloadcms/ui#DocumentIcon' },
     },
   },
-  versions: { drafts: { autosave: { interval: 200 } } },
+  versions: { drafts: { autosave: { interval: 500 } } },
   admin: {
     group: false,
     livePreview: {

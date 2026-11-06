@@ -4,7 +4,7 @@ import * as blocks from '@/blocks/config'
 export const NotFoundPage: GlobalConfig = {
   slug: 'not-found-page',
   label: '404 Page',
-  versions: { drafts: { autosave: { interval: 100 } } },
+  versions: { drafts: { autosave: { interval: 500 } } },
   access: {
     read: () => true,
     update: ({ req }) => Boolean(req.user),

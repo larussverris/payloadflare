@@ -60,17 +60,11 @@ catalogs:
     typescript:
       specifier: 6.0.3
       version: 6.0.3
-    vitest:
-      specifier: 4.1.12
-      version: 4.1.12
 
 importers:
 
   .:
     dependencies:
-      '@dnd-kit/core':
-        specifier: 6.3.1
-        version: 6.3.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
       '@opennextjs/cloudflare':
         specifier: ^1.20.16
         version: 1.20.16(next@16.4.5(@babel/core@7.29.7(supports-color@10.2.2))(@types/node@24.19.2)(babel-plugin-macros@3.1.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(sass@1.77.4))(supports-color@10.2.2)(wrangler@4.157.0(@types/node@24.19.2))
