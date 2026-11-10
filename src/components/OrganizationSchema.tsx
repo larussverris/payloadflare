@@ -2,7 +2,9 @@ import 'server-only'
 import { getPreferences } from '@/utilities/getPreferences'
 
 export async function OrganizationSchema() {
-  const { business } = await getPreferences()
+  const { enableBusinessDetails, business } = await getPreferences()
+  if (!enableBusinessDetails) return null
+
   const url = new URL('/', process.env.NEXT_PUBLIC_SERVER_URL).href
   const logo = business?.logo
   const address = business?.address

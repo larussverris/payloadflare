@@ -1025,7 +1025,11 @@ export interface Preference {
     image?: (number | null) | Media;
   };
   /**
-   * Public company details for search engines. Add the business name to enable this. Only fill in details that apply to your company.
+   * Publish company information for search engines.
+   */
+  enableBusinessDetails?: boolean | null;
+  /**
+   * Add a business name and any other details that apply to your company. Turning off business details keeps this information for later.
    */
   business?: {
     name?: string | null;
@@ -1147,6 +1151,7 @@ export interface PreferencesSelect<T extends boolean = true> {
         description?: T;
         image?: T;
       };
+  enableBusinessDetails?: T;
   business?:
     | T
     | {

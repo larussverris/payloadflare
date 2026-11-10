@@ -79,12 +79,22 @@ export const Preferences: GlobalConfig = {
           label: 'Business details',
           fields: [
             {
+              name: 'enableBusinessDetails',
+              label: 'Enable business details',
+              type: 'checkbox',
+              defaultValue: false,
+              admin: {
+                description: 'Publish company information for search engines.',
+              },
+            },
+            {
               type: 'group',
               name: 'business',
               label: false,
               admin: {
+                condition: (data) => Boolean(data.enableBusinessDetails),
                 description:
-                  'Public company details for search engines. Add the business name to enable this. Only fill in details that apply to your company.',
+                  'Add a business name and any other details that apply to your company. Turning off business details keeps this information for later.',
               },
               fields: [
                 { name: 'name', type: 'text', label: 'Business name' },

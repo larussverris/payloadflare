@@ -203,6 +203,13 @@ document deletions. Autosaves and draft-only saves are skipped.
 
 Published pages are included in the sitemap. Not-found responses remain `noindex`.
 
+In Preferences → Business details, turn on **Enable business details** and add a
+business name to publish company information for search engines. The toggle is
+off by default. Turning it off hides the fields and stops publishing the company
+information while keeping saved details for later. Existing installations need
+to generate a schema migration for the new `enableBusinessDetails` checkbox
+against their own migration history.
+
 Pages renders layout blocks in the main editor and SEO fields in its settings drawer.
 Payload's SEO plugin stores each page's title, description, and sharing image in `meta`;
 images come from the existing Media collection. The plugin shares the Payload
