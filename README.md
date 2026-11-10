@@ -223,7 +223,7 @@ back to their page title.
 - **On-demand invalidation** is supported through D1-backed Next.js cache tags when application code revalidates tagged content.
 - **Deduplicated revalidation** uses a Durable Object queue to avoid repeated ISR work.
 - **Cloudflare image transformations** resize images at `/cdn-cgi/image`, negotiate the output format automatically, and default to quality 85.
-- **Static asset caching** keeps Next.js's hashed `/_next/static/*` files immutable for one year and manually managed `/static/*` files cached for 30 days.
+- **Static asset caching** keeps Next.js's hashed `/_next/static/*` files immutable for one year.
 - **React Compiler** is enabled for automatic React rendering optimizations.
 - **Worker-aware bundling** keeps `jose` and `pg-cloudflare` external for the workerd runtime.
 - **Production logging** writes structured JSON through `console`, which integrates with Cloudflare Workers logs.
@@ -236,15 +236,7 @@ Put manually managed assets in `public/static/` (create the directory when neede
 public/static/logo.svg  ->  /static/logo.svg
 ```
 
-Everything under `/static/*` is served with:
-
-```http
-Cache-Control: public,max-age=2592000
-```
-
-These files are cached by browsers for 30 days. Versioned filenames such as `logo-v2.svg` or `logo.abcd1234.svg` are still useful when an update must appear immediately.
-
-Other files placed directly in `public/` use Cloudflare's normal static-asset caching unless another rule is added to `public/_headers`.
+Files in `public/` use Cloudflare's normal static-asset caching unless another rule is added to `public/_headers`.
 
 Set the required `MAX_UPLOAD_SIZE` environment variable in bytes (for example,
 `6291456` for 6 MiB). There is no fallback value. Payload's Sharp-based crop and focal-point tools are disabled because Sharp is not supported in the Workers runtime.

@@ -1,11 +1,9 @@
 import 'server-only'
 import { getPreferences } from '@/utilities/getPreferences'
-import config from '@payload-config'
 
 export async function OrganizationSchema() {
-  const { serverURL } = await config
   const { business } = await getPreferences()
-  const url = new URL('/', serverURL).href
+  const url = new URL('/', process.env.NEXT_PUBLIC_SERVER_URL).href
   const logo = business?.logo
   const address = business?.address
   const profiles = business?.profiles?.map((profile) => profile.url.trim()).filter(Boolean)

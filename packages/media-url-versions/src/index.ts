@@ -7,14 +7,14 @@
 import type { CollectionAfterReadHook, Plugin } from 'payload'
 
 /** Version the main file URL without changing the filename or other media URLs. */
-export const versionMediaURLs: CollectionAfterReadHook = ({ doc, req }) => {
+export const versionMediaURLs: CollectionAfterReadHook = ({ doc }) => {
   if (typeof doc.url !== 'string' || !doc.url) return doc
   if (typeof doc.updatedAt !== 'string') return doc
 
   const timestamp = Date.parse(doc.updatedAt)
   if (!Number.isFinite(timestamp)) return doc
 
-  const url = new URL(doc.url, req.payload.config.serverURL)
+  const url = new URL(doc.url, process.env.NEXT_PUBLIC_SERVER_URL)
   url.searchParams.set('v', String(timestamp))
 
   // Keep root-relative URLs relative; preserve the origin on absolute URLs.

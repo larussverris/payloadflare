@@ -30,7 +30,7 @@ async function sitemap() {
     const path = `/${page._h_slugPath.replace(/^home$/, '')}`
 
     entries.push({
-      url: new URL(path, payload.config.serverURL).href,
+      url: new URL(path, process.env.NEXT_PUBLIC_SERVER_URL).href,
       lastModified: page.updatedAt,
     })
   }

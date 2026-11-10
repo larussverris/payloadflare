@@ -49,7 +49,6 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
     getHeader(isEnabled),
     getFooter(isEnabled),
   ])
-  const { serverURL } = await config
 
   async function refreshPreview() {
     'use server'
@@ -62,7 +61,12 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
         <OrganizationSchema />
       </head>
       <body>
-        {isEnabled && <RefreshRouteOnSave refresh={refreshPreview} serverURL={serverURL!} />}
+        {isEnabled && (
+          <RefreshRouteOnSave
+            refresh={refreshPreview}
+            serverURL={process.env.NEXT_PUBLIC_SERVER_URL}
+          />
+        )}
         <header>{renderBlocks(header?.layout)}</header>
         <main>{children}</main>
         <footer>{renderBlocks(footer?.layout)}</footer>
@@ -72,10 +76,9 @@ export default async function RootLayout(props: { children: React.ReactNode }) {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { serverURL } = await config
   const { favicon, meta } = await getPreferences()
   const metadata: Metadata = {
-    metadataBase: new URL(serverURL),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SERVER_URL),
     title: meta?.title,
     description: meta?.description,
   }
