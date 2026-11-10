@@ -655,13 +655,7 @@ export interface MediaSelect<T extends boolean = true> {
 export interface PagesSelect<T extends boolean = true> {
   parent?: T;
   title?: T;
-  layout?:
-    | T
-    | {
-        image?: T | ImageBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-      };
+  layout?: T | {};
   slug?: T;
   meta?:
     | T
@@ -677,36 +671,6 @@ export interface PagesSelect<T extends boolean = true> {
   _status?: T;
   _h_slugPath?: T;
   _h_titlePath?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ImageBlock_select".
- */
-export interface ImageBlockSelect<T extends boolean = true> {
-  image?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "TextBlock_select".
- */
-export interface TextBlockSelect<T extends boolean = true> {
-  heading?: T;
-  body?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "VideoBlock_select".
- */
-export interface VideoBlockSelect<T extends boolean = true> {
-  video?: T;
-  captions?: T;
-  captionsLanguage?: T;
-  id?: T;
-  blockName?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1087,13 +1051,7 @@ export interface Preference {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  layout?:
-    | T
-    | {
-        image?: T | ImageBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-      };
+  layout?: T | {};
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1105,13 +1063,7 @@ export interface FooterSelect<T extends boolean = true> {
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
-  layout?:
-    | T
-    | {
-        image?: T | ImageBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-      };
+  layout?: T | {};
   createdBy?: T;
   updatedBy?: T;
   updatedAt?: T;
@@ -1123,13 +1075,7 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "not-found-page_select".
  */
 export interface NotFoundPageSelect<T extends boolean = true> {
-  layout?:
-    | T
-    | {
-        image?: T | ImageBlockSelect<T>;
-        text?: T | TextBlockSelect<T>;
-        video?: T | VideoBlockSelect<T>;
-      };
+  layout?: T | {};
   createdBy?: T;
   updatedBy?: T;
   _status?: T;

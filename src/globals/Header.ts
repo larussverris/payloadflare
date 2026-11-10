@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload'
+import type { BlockSlug, GlobalConfig } from 'payload'
 import * as blocks from '@/blocks/config'
 
 export const Header: GlobalConfig = {
@@ -17,7 +17,7 @@ export const Header: GlobalConfig = {
     {
       name: 'layout',
       type: 'blocks',
-      blocks: Object.values(blocks),
+      blocks: Object.values(blocks).map((block) => block.slug as BlockSlug),
       // Add the block slugs allowed in the header, e.g. ['text', 'image'].
       filterOptions: () => [],
     },

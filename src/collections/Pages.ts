@@ -1,4 +1,4 @@
-import type { CollectionConfig, Where } from 'payload'
+import type { BlockSlug, CollectionConfig, Where } from 'payload'
 import * as blocks from '@/blocks/config'
 import {
   MetaDescriptionField,
@@ -80,7 +80,9 @@ export const Pages: CollectionConfig = {
     {
       name: 'layout',
       type: 'blocks',
-      blocks: Object.values(blocks),
+      blocks: Object.values(blocks).map((block) => block.slug as BlockSlug),
+      // Add the block slugs allowed in pages, e.g. ['text', 'image'].
+      filterOptions: () => [],
     },
     {
       type: 'row',

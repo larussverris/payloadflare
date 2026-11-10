@@ -170,6 +170,9 @@ Each block lives
 in `src/blocks/<BlockName>/`, with its schema in `config.ts` and its frontend renderer
 in `index.tsx`. Use named component exports and import implementations from the
 block directory. Register additional renderers in `src/components/BlocksRenderer.tsx`.
+Export block schemas from `src/blocks/config.ts` to register them once in the root
+Payload config. Reference their slugs in layout fields' `blocks` arrays instead of
+embedding the schemas again. Add new block slugs to the layouts that should support them.
 
 The `/preview` entry handler verifies the Payload session, enables Next.js Draft
 Mode, and redirects to the requested local path. Normal page routing validates the

@@ -1,4 +1,4 @@
-import type { GlobalConfig } from 'payload'
+import type { BlockSlug, GlobalConfig } from 'payload'
 import * as blocks from '@/blocks/config'
 
 export const NotFoundPage: GlobalConfig = {
@@ -13,14 +13,16 @@ export const NotFoundPage: GlobalConfig = {
     group: false,
     livePreview: {
       openByDefault: true,
-      url: () => `/preview?${new URLSearchParams({ path: `/${crypto.randomUUID()}` })}`,
+      url: '/preview?path=/_not-found',
     },
   },
   fields: [
     {
       name: 'layout',
       type: 'blocks',
-      blocks: Object.values(blocks),
+      blocks: Object.values(blocks).map((block) => block.slug as BlockSlug),
+      // Set the block slugs allowed on the 404 page.
+      filterOptions: () => [],
     },
   ],
 }
