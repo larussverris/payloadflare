@@ -13,6 +13,7 @@ import { seoPlugin } from '@payloadcms/plugin-seo'
 import { cloudflareEmailAdapter } from '@payloadflare/email-cloudflare'
 import { pathPreview } from '@payloadflare/path-preview'
 import { mediaURLVersions } from '@payloadflare/media-url-versions'
+import { cloudflareMediaThumbnails } from '@payloadflare/media-thumbnails-cloudflare'
 import * as blockSchemas from '@/blocks/config'
 import * as collections from '@/collections'
 import * as globals from '@/globals'
@@ -159,6 +160,7 @@ const config = buildConfig({
   plugins: [
     pathPreview({ collections: ['pages'], replace: [/^\/home$/, '/'] }),
     mediaURLVersions({ collections: [collections.Media.slug] }),
+    cloudflareMediaThumbnails({ collection: collections.Media.slug }),
     seoPlugin({
       uploadsCollection: collections.Media.slug,
       collections: [], // Pages declares its SEO fields directly.

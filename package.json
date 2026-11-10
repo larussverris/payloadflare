@@ -35,6 +35,7 @@
     "@payloadcms/storage-r2": "catalog:",
     "@payloadcms/ui": "catalog:",
     "@payloadflare/email-cloudflare": "workspace:*",
+    "@payloadflare/media-thumbnails-cloudflare": "workspace:*",
     "@payloadflare/media-url-versions": "workspace:*",
     "@payloadflare/path-preview": "workspace:*",
     "graphql": "^16.14.2",

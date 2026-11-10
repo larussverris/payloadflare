@@ -106,6 +106,15 @@ The `first-primary` strategy is enabled in `src/payload.config.ts`, but replicas
 
 Payload stores uploads in the `R2` bucket and serves files through `/api/media/file/<filename>` in both development and production. No separate media domain or media URL environment variable is required.
 
+The `cloudflareMediaThumbnails` plugin from `@payloadflare/media-thumbnails-cloudflare`
+accepts one upload collection via `collection` and is configured for Media in
+`src/payload.config.ts`. Admin thumbnails use Cloudflare
+image transformations for raster images and Media Transformations to extract the
+first frame of videos, both at 320 × 320. Enable transformations for your Cloudflare
+zone and allow the media source origin. SVGs use their original URL. In development,
+the plugin leaves thumbnail handling to Payload. Other file types
+use Payload's default file display. Existing upload options are preserved.
+
 Public image responses use a 30-day browser TTL and a 30-day edge TTL in production. Development image responses use `no-store`. [Workers Cache](https://developers.cloudflare.com/workers/cache/) is enabled in `wrangler.jsonc`, using the standard OpenNext entrypoint. Payload's `Media` collection sets the file response cache headers; `next.config.ts` excludes application routes outside `/api/media/file/` from Workers Cache. Non-image file responses handled by the media header hook also opt out. OpenNext's existing internal caches and browser cache headers are preserved. No custom Worker wrapper or dashboard Cache Rule is needed.
 
 On a cache miss, Payload retrieves the image from R2. On a hit, Cloudflare serves the cached image at the same `/api/media/file/` URL without executing Payload. This shared caching assumes the collection's current public read access (`read: () => true`); private media needs a different cache policy. File-route errors that do not reach the media header hook follow their response headers and Cloudflare's default cache behavior.
